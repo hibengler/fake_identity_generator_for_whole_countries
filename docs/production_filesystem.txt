@@ -1,0 +1,200 @@
+Fake Identity Generator
+Copyright (C) 2011-2016 Hibbard M. Engler (Bitcoin address 1ERDHsxtekdh5FAsxdb92PBFK7nnuwMkbp for gifts)
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+
+The production filesystem version 1: 3 separate encryped drives
+ssn pages/sec: 19
+
+On the raid 0 of burner:  82 pages per second.
+Using squash (gzip): 93 pages per second
+
+But squashfs adds alot to the user cpu usage of the machine.
+Analysis shows that squashfs will max out at 260 mb/sec regardless
+of how fast the file system is.  And since the new e350 has two
+slower cores,  that just won't do.
+
+Note - we are going to use xz compression in production
+
+Solution: Use 3 SSD's raid 0 for most stuff.  And have a raw partiition
+squashfs raid 0 for the less used stuff.   And also get rid of the 
+stuff that we don't even use.
+
+Unused:
+dl, passport, phone_prefix, zip4, zip_name, are not used - 68gb saved!
+Not indexed by google:
+everything, first_middle, id, state_city, and zip_street 
+These are out of robots.txt,  but people can search them.
+Everything is the key - it is very compressible, and 318 gb
+394 gb total
+
+Left: n001, city_state, first_last, last_first, area, ssn, 167 gb total
+The estimated throughput is close to 1600MB/sec ar random io,  which would get us 
+250 hits/second.
+To setup:
+mkdir outs
+cd outs
+
+ln ../out/n001_everything.txt .
+ln ../out/n001_first_middle_last.txt .
+ln ../out/n001_id.txt .
+ln ../out/n001_state_city.txt .
+ln ../out/n001_zip_street.txt .
+cd ..
+time ~/mksquashfs outs outs.sqsh -comp xz
+
+/* optional -processors 4
+Note - burner had an older version of squashfs so I copied the newerwer mksquashfs (4.2)
+this was to get the xz compression
+*/
+
+Compression was 29% on all files .  With xz unknown
+I did not test decompression speed of xz,  but I will assume it is better,
+because it is newer.  and because 7zip sounds like 7up, and diet 7up is my favorite soda.
+
+
+
+hard disk analysis - sdd versus xdd..ods has the stats and the stuff used to collect.
+
+6GB/s ssd drives can get sustained read of 550mb/s and writes the same, but we don't care about 
+don't care about writes.
+
+So buying 3 $110.00 SSD's will make this baby scream!
+Have to be careful - some ssd drives are not equal to others.  
+
+
+Oh - I didn't deal with the sitemap - which is compressed anyways 10gb,
+so I guess it tacks to the end of the main fs.
+
+Layout
+20 boot <- drive 1  (note could have copies - maybe 10, maybe 8 so it fits on USB )
+hell 16 - usb's are cheap.  Then we can do a dd if things crash.
+
+25 45 45 115 total - raw raid 0 for the squashfs.
+83 83 83 249 raw raid 0 for /u1  - and /u1 will hold the guts.
+ 
+The cool thing about these little boards is that they can probably be doubled up on one power supply so I can squeeze three into 
+my specialty 1u case.
+
+
+
+
+
+
+
+
+OK - to get the squashed fs over - we will copy it via ssh, then do a DD
+should be fun
+
+time scp -c arcfour -r -p hib@10.10.11.9:/t/player/outs.sqsh .
+
+as root
+time dd if=outs.sqsh of=/dev/md0 bs=1M
+
+waitio 15.9% cpu dd 65 flush 20 kswapd 12
+258 mb/sec/  Why so low?
+750 mb/sec on the raided file system
+/dev/md0 - 450
+/dev/sda - 333
+
+Oh well.
+dd on th /s1 is 15mb/second.  Really slow. dd is full size
+
+
+Back on burner - need to restrict:
+
+cd /t/player
+mkdir o2
+cd out
+ls | awk '{print "ln " $1 " ../o2"}' | bash
+ 
+
+cd ../o2
+rm n001_everything.txt
+rm n001_dl.txt
+rm n001_passport.txt
+rm n001_first_middle_last.txt
+rm n001_id.txt
+rm n001_phone_prefix.txt*
+rm n001_state_city.txt
+rm n001_zip4_street.txt
+rm n001_zip_name.txt
+rm n001_zip_street.txt
+
+back to the "money" machine
+cd /u1/player
+rm outs.sqsh
+time scp -c arcfour -r -p hib@10.10.11.9:/t/player/o2 .
+
+
+mv o2 out
+
+cd /s1
+ls | awk '{print "ln -s /s1/" $1 " /u1/player/out"}' | bash
+
+
+
+To compile fresh
+get installs from star - note imagemagick is not really needed right now,  but what the heck.
+
+cd ~/installs/imagemagick
+cd zlib-1.2.5
+make install
+cd ../libpng-1.4.5
+make
+make install
+cd ../ImageMagick-6.7.4-0
+make clean
+./configure --prefix=/usr
+make -j 2
+make install
+
+
+Then final work:
+mkdir ../occlude
+dd if=/dev/zero of=../occlude/occlusion.dat bs=32000000 count=1
+
+
+
+Had to move geometry for drugs,  and set thinsg up
+now for perl
+
+scp -p z@star:/usr/local/bin/verify_captcha.pl /usr/local/bin/
+cpan
+install Captcha::reCAPTCHA
+
+
+
+OOPS - forgot gpg  e stand alone one that has the IDEA algorithm.
+scp -p -r z@star:/usr/bin/gpg* /usr/bin
+
+scp -p -r star:.gnupg .
+
+
+
+
+firewall - add port 80 for google
+/usr/bin/firewall and
+/usr/bin/clear_firewall
+for recaptcha - look at http://code.google.com/p/recaptcha/wiki/FirewallsAndRecaptcha
+
+
+firewall needs work
+
+
+
+
+touch data_time

@@ -1,0 +1,104 @@
+
+
+#
+# Fake Identity Generator
+# Copyright (C) 2011-2016 Hibbard M. Engler (Bitcoin address 1ERDHsxtekdh5FAsxdb92PBFK7nnuwMkbp for gifts)
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+
+small: pgood_name_p8.txt
+tiny: pgood_name_p8.txt
+
+system:	pgood_name_p8.txt
+
+
+
+pgood_name_p8.txt:	pgood_name_p7.txt 
+	@echo pgood_name_p8.txt pfiltersmall `cat prun`
+	match -n  16 34 33 zipcode_lname_fname.txt \
+	  <pgood_name_p7.txt 2>d1.txt   >d2.txt
+	mv d2.txt pgood_name_p8.txt
+	mv d1.txt pgood_name_redo_p8.txt
+	
+
+pgood_name_p7.txt:	pgood_name_p6.txt 
+	@echo pgood_name_p7.txt pfiltersmall `cat prun`
+	match <pgood_name_p6.txt  15 special_states.inp \
+  2>pass_p7.txt | \
+    match  -n 15 34 33 35 state_lname_fname_minit.txt  2>d1.txt >d2.txt
+	cat >>pass_p7.txt d2.txt
+	#rm d2.txt
+	mv pass_p7.txt pgood_name_p7.txt
+	mv d1.txt pgood_name_redo_p7.txt
+
+pgood_name_p6.txt:	pgood_name_p5.txt 
+	@echo pgood_name_p6.txt pfiltersmall `cat prun`
+	is_it_filled_in <pgood_name_p5.txt 17 2>d0_skippy.txt | \
+  match -n  17 34 33  area_code_lname_fname.txt 2>d1.txt  >d2.txt
+	cat >>d2.txt d0_skippy.txt
+	rm  d0_skippy.txt 
+	mv d2.txt pgood_name_p6.txt
+	mv d1.txt pgood_name_redo_p6.txt
+
+
+pgood_name_p5.txt:	pgood_name_p2.txt 
+	@echo pgood_name_p5.txt pfiltersmall `cat prun`
+	@echo check if first name last name in same city
+	match -n  15 14 10  34  \
+	city_street_lname.txt  <pgood_name_p2.txt 2>d1.txt | \
+	 match -n  16 10 34 \
+	  zipcode_street_lname.txt   2>d3.txt  	>d2a.txt
+	match <d2a.txt -n 15 14 34 33 \
+	 city_lname_fname.txt   2>d4.txt  >d2.txt
+	mv d2.txt pgood_name_p5.txt
+	rm d2a.txt
+	mv d4.txt pgood_name_redo_p5.txt
+	mv d3.txt pgood_name_redo_p4.txt
+	mv d1.txt pgood_name_redo_p3.txt
+
+
+
+
+pgood_name_p2.txt:	pgood_name_p1.txt \
+ psingleton_name_p1.txt
+	@echo pgood_name_p2.txt pfiltersmall `cat prun`
+	@echo this is normally the wedding ceremony
+	cat >f4.txt pgood_name_p1.txt psingleton_name_p1.txt
+	mv f4.txt pgood_name_p2.txt
+
+psingleton_name_p1.txt: pgood_name_p1.txt
+	@echo psingleton_name_p1.txt pfiltersmall `cat prun`
+	time  make_singleton_name <predo_lname.txt -w  -p -l >z1.txt `cat random_seed`
+	time make_singleton_name <predo_fname.txt -w -p -l >>z1.txt `cat random_seed`
+	mv z1.txt psingleton_name_p1.txt		
+
+
+pgood_name_p1.txt: random_seed predo_lname.txt predo_fname.txt
+	@echo pgood_name_p1.txt pfiltersmall `cat prun`
+	cat </dev/null >pgood_name_p1.txt
+	touch pbad_name_p1.txt
+	 touch singleton_gender.txt
+	 touch singleton_lname.txt
+	 touch singleton_fname.txt
+	 touch singleton_minit.txt
+	 touch singleton_mname.txt
+	 touch singleton_suffix.txt
+
+
+random_seed:
+	generate_random_seed >random_seed
+	
+	

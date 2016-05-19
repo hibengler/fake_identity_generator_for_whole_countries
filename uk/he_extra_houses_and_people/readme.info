@@ -1,0 +1,65 @@
+Fake Identity Generator
+Copyright (C) 2011-2016 Hibbard M. Engler (Bitcoin address 1ERDHsxtekdh5FAsxdb92PBFK7nnuwMkbp for gifts)
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+This section doubles the number of people by making new houses based on existing houses.
+Input is l006 - which is about 125 million people - expanded households with wives, uncles and aunts.
+
+
+
+l006 - the input for this side
+country.txt - a count of all people in the country from l006
+house.txt - count of people per address
+house_index.txt - indexed position for address without po box 
+street.txt - count of people per street
+zip.txt - count of people per zip code
+
+Then make_street reads from house.txt to make the new addresses possible. to build newhouse.txt
+make_street2 builds the same as make_street but it adds 2 city blocks to each block,  this is 
+the second set - so we fill up the inner city first, then grow the city second.
+
+newhouse.txt - new houses inbetween known houses
+newhouse2.txt - new houses outside of known block numbers
+country_a.txt - country.txt with USA added as an extra field and the desired number of people to make.
+                 This is then distributed by zip, etc.
+zip_a.txt - zip code old count and new count
+
+address_lname_gender_id.txt: used to match husband and spouse - done zip code by zip code.
+      zip|addr|last name|gender|id|count
+
+newhouse_zipcount.txt   - number of houses in the zip code of new houses between existing houses
+newhouse2_zipcount.txt  - number of houses in the zip code of potential new houses with the extra street
+
+
+make_extra_houses - command to build the extra households needed
+
+households.txt - new houses to actually use.  We do this by filling up the zip codes
+     first by the inbetween addresses, then by the extra block addresses.
+
+
+elaborate_household - this is cool.  This finds the old street number from households.txt and matches it up
+from thre it copies the person once per new household - and husband and wives will be duplicated. used to make 
+unnamed_households.txt from households.txt and l006
+
+unnamed_households.txt - households witht the prototype names and prototype id's referencing the older l006 ids.
+
+
+husband_wife.txt - a list of husband wife id pairs based on l006 - this is used to marry later on.
+
+
+OK at this point, we have unnamed_households.txt and we will have to process everything.  To do this,
+we call 
+...

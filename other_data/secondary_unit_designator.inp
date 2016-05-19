@@ -1,0 +1,23 @@
+APARTMENT	      APT	
+    BASEMENT	      BSMT *	
+    BUILDING 	      BLDG	
+    DEPARTMENT	      DEPT	
+    FLOOR 	      FL	
+    FRONT	      FRNT *	
+    HANGAR	      HNGR	
+    LOBBY	      LBBY *	
+    LOT	      LOT 	
+    LOWER	      LOWR *	
+    OFFICE	      OFC *	
+    PENTHOUSE	      PH *	
+    PIER	      PIER	
+    REAR	      REAR *	
+    ROOM	      RM	
+    SIDE	      SIDE *	
+    SLIP	      SLIP	
+    SPACE	      SPC	
+    STOP	      STOP	
+    SUITE	      STE	
+    TRAILER	      TRLR	
+    UNIT	      UNIT	
+    UPPER	      UPPR *	

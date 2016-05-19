@@ -1,0 +1,254 @@
+
+#
+# Fake Identity Generator
+# Copyright (C) 2011-2016 Hibbard M. Engler (Bitcoin address 1ERDHsxtekdh5FAsxdb92PBFK7nnuwMkbp for gifts)
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+	
+	s = '|'
+	numbers = '0123456789'
+	evens = '02468'
+	odds = '12579'
+	ualpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+	snumbers = span(numbers)
+	sualpha = span(ualpha)
+	
+	anything = &alphabet
+	anything '|' = ''
+	m = span(anything) | ''
+	
+	sanything = m
+	
+	zip = m 
+	dir = m 
+	spanish = m 
+	name = m 
+	type = m 
+	dir2 = m 
+	
+	addresses = array(10000)
+	city_states = array(10000)
+	
+	heading = zip . the_zip s ( dir s spanish s name s type s dir2 s ) . the_heading
+	addy = ( m s m s m s ) . the_addy
+	city_state = ( m s m s ) . the_city_state
+	line_main = heading addy city_state m . the_people_count
+		
+* type 1  1339 winn.. no abc no number
+
+	type1 = snumbers s m s m s rpos(0)
+	type2 = snumbers . number_a sualpha  s m s m s rpos(0)
+	define('heading_change()')
+	define('nsort(arr,arr2,acount),a,b,c,d,e')
+	define('nevenodd(arr,arr2,acount),a,b,c,d,e')
+	define('expand(arr,arr2,acount),a,b,c,d,e')
+
+	&anchor = 1
+	old_heading = ''
+	old_zip = ''
+	prev_zip = ''
+	icount = 0
+loop	x = input	:f(endd)
+	x line_main	:f(abortit)
+	the_heading old_heading rpos(0)	:s(s1)
+	heading_change()	
+s1	old_heading = the_heading
+	old_zip = the_zip
+	icount = icount + 1
+	addresses<icount> = the_addy
+	city_states<icount> = the_city_state
+	:(loop)
+
+	
+abortit
+	terminal = 'error ' x
+	:(loop)	
+	
+	:(endd)
+	
+* we have a full set of addresses. Figure out what type it is
+heading_change
+*	output = 'hc ' old_heading ' ' icount
+	prev_zip the_zip rpos(0)	:s(s2)
+	index = 0
+s2	prev_zip = the_zip
+	state = 'initial'
+	i = 0
+l2	i = i + 1
+	gt(i,icount)	:s(e2)
+	x = addresses<i>
+	:($('state_' state))
+e2	:($('setis_' state))
+
+
+state_initial
+	x type1	:f(l2)
+	state = 'type1'  :(l2)
+
+state_type1
+	x type1	:s(l2)
+	x type2	:s(oo)
+	terminal = ' vvv ' x
+	state = 'unknown'  :(l2)
+
+* take off the ABC part
+oo	addresses<i> snumbers sualpha s = number_a s
+	:(l2)
+	
+		
+				
+state_unknown
+	:(l2)
+	
+
+
+setis_initial
+setis_unknown
+	y = ''
+	comma = ''
+	i = 0
+l2a	i = i + 1
+	gt(i,icount)	:s(e2a)
+	y = y comma addresses<i>
+	comma = ' '
+	:(l2a)
+e2a	terminal = old_zip s old_heading s 'unknown ' s y
+	icount = 0
+	old_heading = the_heading
+	:(freturn)
+
+setis_type1	
+* 	need to sort numerically
+	nsort(addresses,city_states,icount)
+*	need to separate between even and odd
+	nevenodd(addresses,city_states,icount)
+*	expand through the evens
+	ouptut = even_count ' ec'
+	expand(even,even_d,even_count)
+* 	expand through the odds
+	expand(odd,odd_d,odd_count)
+* output the new addresses 	
+	out_new_addresses
+* ok
+	icount = 0
+	old_heading = heading
+	:(return)	
+
+
+
+
+
+
+
+* nsort - takes in number|| and sorts the number pare numerically
+nsort
+	a = 0
+nl1	a = a + 1
+	gt(a,acount)	:s(ne1)
+	b = 0
+nl2	b = b + 1
+	ge(b,a)	:s(nl1)
+	arr<a> snumbers . c
+	arr<b> snumbers . d
+	lt(c,d)	:f(nl2)
+	d = arr<a>
+	arr<a> = arr<b>
+	arr<b> = d
+	d = arr2<a>
+	arr2<a> = arr2<b>
+	arr2<b> = d
+	:(nl2)
+ne1	:(return)
+* debugging below:
+	a = 0
+nl3	a = a + 1
+	gt(a,acount)	:s(ne3)
+	output = a ' ' arr<a>
+	:(nl3)
+ne3
+	:(return)
+
+
+
+
+
+
+
+
+
+nevenodd
+	even = array(acount)
+	odd = array(acount)
+	even_d = array(acount)
+	odd_d = array(acount)
+	even_count = 0
+	odd_count = 0
+	a = 0
+neol1	a = a + 1
+	gt(a,acount)	:s(neoe1)
+	arr<a> arbno(any(numbers)) any(numbers) . c '|'
+	c any(evens)	:s(neoe)
+	odd_count = odd_count + 1
+	odd<odd_count> = arr<a>
+	odd_d<odd_count> = arr2<a>
+	:(neol1)
+neoe	even_count = even_count + 1
+	even<even_count> = arr<a>
+	even_d<even_count> = arr2<a>
+	:(neol1)
+neoe1	:(return)
+
+
+expand
+	a = 0
+	b = ''
+	c = ''
+exl1	b = c
+	a = a + 1
+	gt(a,acount)	:s(exe1)
+	arr<a> snumbers . c
+	f = arr2<a>
+	b '' rpos(0)	:s(exl1)
+* here we have a gap,  but if we cross the centure mark, we ignore it
+* this is because some streets do 1301 1307 1315 1339 1357 then stop.
+* This will goof up roural routs and roads.  so if the gap is greater than
+* 300,  we do this anyways
+* 10,000 addresses there anyways!	
+	gt(c - b,300)	:s(exp1)
+	d = b / 100
+	e = c / 100
+	eq(d,e)		:f(exl1)
+exp1	gt(c - b,1000)	:s(exl1)
+
+	d = b
+exl2	d = d + 2
+	ge(d,c)		:s(exe2)
+	index = index + 1
+	index2 = (index + 1000000)
+	index2 '1' = '0000'
+	output = old_zip s index2 s old_heading d s s s f
+	:(exl2)
+exe2	:(exl1)
+
+exe1	
+	:(return)
+	
+	
+
+endd	old_heading ''	:s(enddd)
+	heading_change()
+enddd
+end

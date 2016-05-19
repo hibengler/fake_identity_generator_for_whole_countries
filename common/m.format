@@ -1,0 +1,132 @@
+Fake Identity Generator
+Copyright (C) 2011-2016 Hibbard M. Engler (Bitcoin address 1ERDHsxtekdh5FAsxdb92PBFK7nnuwMkbp for gifts)
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+
+Format of m file
+Vertical bar database
+
+This is the format going out
+
+100	1	0	blank
+100	2	1	blank
+100	3	2	blank
+100	4	3	blank
+100	5	4	blank
+100	6	5	blank
+100	7	6	blank
+100	8	7	blank
+100	9	8	blank
+100	10	9	blank10
+75	11	10	newid watermarked ( only watermarked for the customers copies )
+34	12	11	Last name
+33	13	12	first_name
+35	14	13	middle_init
+36	15	14	middle_name				
+7	16	15	full address ( with watermark )		2
+8	17	16		street number 
+9	18	17		street direction
+10	19	18		street name
+11	20	19		street type (with watermark)	3
+12	21	20		subdivision type
+13	22	21		subdivision number
+14	23	22	city
+15	24	23	state
+16	25	24	zip
+40	26	25	area code
+41	27	26	prefix
+42	28	27	rest phone
+20	29 	28	name suffix
+21	30	29	plus4 part of zip code
+22	31	30	age range
+23	32	31	congress
+24	33	32	county
+25	34	33	dpv
+74	35	34	gender					4
+27	36	35	latitude 
+28	37	36	longitude
+30	38	37	spanish street type - aprt of address. wm  6
+31	39	38	second street direction - i.e.     wm 	7
+43	40	39	ac2					
+44	41	40	prefix2					
+45	42	41	rest2					
+39	43	42	maiden name				
+50	44	43	birth_state
+51	45	44	birth_date
+52	46	45	birth_date_code
+53	47	46	ssn_part_1
+54	48	47	ssn_part_2	
+55	49	48	ssn_part_3
+56	50	49	ssn
+57	51	50	DL
+58	52	51	cc1	wm				8
+59	53	52	cc1 exp	wm				9
+60	54	53	cc1 ccv	wm				10
+61	55	54	cc2 	wm				11
+62	56	55	cc2 exp	wm				12
+63	57	56	cc2 ccv	wm				13
+64	58	57	cc3	wm				14
+65	59	58	cc3 exp	wm				15
+66	60	59	cc3 ccv	wm				16
+67	61	60	passport id
+68	62	61	passport expdate
+69	63	62	passport extra code
+70	64	63	passport code1
+71	65	64	passport code2
+76	66	65	spouse id
+100	67	66	reserved
+100	68	67	reserved
+100	69	68	reserved
+100	70	69	reserved
+100	71	70	watermark1
+100	72	71	watermark2
+100	73	72	watermark3
+100	74	73	watermark4
+100	75	74	reserved
+100	91	90	variant identifier maybee?
+
+
+2 - full address can have street type, and other parts non-abbreviated
+3 - street type might not be abbreviated
+4 - gender is clipped to 1 character
+5 - I don't remember what type is - probably will get rid of it
+6 - could be not abbreviated
+7 - could be not abbreviated
+8 - cc num bit might be flipped compared to original
+9 - exp might be + 1 month compared to original
+10 - ccv is xored a 3 digit code
+11 - cc num bit might be flipped compared to original
+12 - exp might be + 1 month compared to original
+13 - ccv is xored a 3 digit code
+14 - cc num bit might be flipped compared to original
+15 - exp might be + 1 month compared to original
+16 - ccv is xored a 3 digit code
+
+
+So, we can have a very distinct watermark code,  and modify things based on the code
+
+We modify once - on the m base - so that it is watermarked as the base.
+
+Then for company sets - modify once for company - so we know which company had the breach.
+
+For public infomration - the cc nums cannot change.  We need to be consistent there. Same with the middle initials.
+So we vary only the road info -- harder to pinpoint, but still possible, especially if someone does a massive load.
+Will provide a fake id number - xored as well.  If they are dumb enbough to keep that, we know who they are!
+
+
+The sets - will never be compared, and do not change once published.
+
+The public information - will be compared, so change only the street info, etc.

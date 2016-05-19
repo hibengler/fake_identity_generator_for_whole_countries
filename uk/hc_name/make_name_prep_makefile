@@ -1,0 +1,93 @@
+#
+# Fake Identity Generator
+# Copyright (C) 2011-2016 Hibbard M. Engler (Bitcoin address 1ERDHsxtekdh5FAsxdb92PBFK7nnuwMkbp for gifts)
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+make_name_prep.txt: ../common/lname.txt ../common/fname.txt ../common/first_last_name.txt ../common/last_first_name.txt \
+	../common/first_middle_init.txt ../common/mname.txt  ../common/minit_fake.txt ../common/last_name_suffix.txt \
+	 ../common/husband_wife004.txt \
+	 ../common/fname_noinit.txt
+	touch make_name_prep.txt
+
+
+
+
+../common/last_first_name.txt:	../common/l004.txt
+	@echo last_first_name.txt noinit
+	export TMP=$(TMP2);time fielduc -s 20000000 -24 -m2 3 26 4 <../common/l004.txt >x4.txt
+	mv x4.txt ../common/last_first_name.txt
+
+../common/first_last_name.txt:	../common/l004.txt
+	@echo first_last
+	time fielduc -s 20000000 -m2 4 26 3 <../common/l004.txt >x3.txt
+	mv x3.txt ../common/first_last_name.txt
+
+../common/fname.txt:	../common/l004.txt
+	@echo fname with init
+	time fielduc -s 4 26 <../common/l004.txt >x2.txt
+	mv x2.txt ../common/fname.txt
+
+../common/fname_noinit.txt:	../common/l004.txt
+	@echo fname_noinit
+	time fielduc -24 -s 4 26 <../common/l004.txt >x2ee.txt
+	mv x2ee.txt ../common/fname_noinit.txt
+	
+../common/lname.txt:	../common/l004.txt
+	@echo lname2 with gender
+	time fielduc -24 -s  3 26 <../common/l004.txt >x1.txt
+	mv x1.txt ../common/lname.txt
+
+../common/first_middle_init.txt: ../common/l004.txt
+	@echo first_middle_init.txt
+	time fielduc -s -m2 26 4 5  <../common/l004.txt >w13.txt
+	mv w13.txt ../common/first_middle_init.txt
+
+../common/mname.txt: ../common/l004.txt
+	@echo mname.txt
+	@echo we are really going to use the first name instead of middle name because middle names are crappy
+	time fielduc -s -m2 -i4 26  -t4 4  <../common/l004.txt >w14.txt
+	mv w14.txt ../common/mname.txt
+
+
+../common/minit_fake.txt: ../common/l004.txt
+	@echo minit_fake.txt
+	time fielduc -s 26 -i4 -t4   <../common/l004.txt >w152.txt
+	mv w152.txt ../common/minit_fake.txt
+
+../common/last_name_suffix.txt: ../common/l004.txt
+	@echo last_name_suffix.txt
+	time fielduc -m2 -s 26 3 20 <../common/l004.txt >w16.txt
+	mv w16.txt ../common/last_name_suffix.txt
+
+
+../common/husband_wife004.txt: address_lname_gender_id.txt
+	@echo husband_wife.txt
+	find_spouse <address_lname_gender_id.txt >f1.txt 2>f2.txt
+	fsort 2000000000 <f1.txt >../common/husband_wife004.txt
+	fsort 2000000000 <f2.txt >../common/wife_husband004.txt
+
+address_lname_gender_id.txt: ../common/l004.txt
+	@echo address_lname_gender_id
+	@echo find the address gender so we can mate people
+	time fielduc 160000000 <../common/l004.txt -s 16 7 3 26 2 >f1r.txt
+	mv f1r.txt address_lname_gender_id.txt
+
+
+
+
+
+
+
+

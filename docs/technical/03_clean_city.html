@@ -1,0 +1,142 @@
+Fake Identity Generator
+Copyright (C) 2011-2016 Hibbard M. Engler (Bitcoin address 1ERDHsxtekdh5FAsxdb92PBFK7nnuwMkbp for gifts)
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+Version 1.0
+Clean Leads.<p>
+The main file is tab separated values.  This has the name and address in one field.
+The name could have abbreviations, prefix, suffix, middle names.  
+Sometimes has multiple people listed:<br>
+Ozzy & Harriet Smith<br>
+Sometimes the middle name abbreviation is also spelled out:
+John E Edward Svenson<br>
+Basicaly, it is a complete mess.  I needed to filter this out to have 
+the first name, last name, middle initial, middle name, prefix, suffix, all separated out so that
+they could be accurately processed.<br>
+Addresses have an even larger possiblity of formats.  For Example,  there is the street name
+and there is the spanish street name.<br>
+Regular street name: 121 Wildwood Way<br>
+Spanish Street name: 144 Rio De La Plata<br>
+Then the apartment numbers could or could not start with letters, or numbers, or a combination.<br>
+Then there are the Rural Routs, PO Boxes, and many other possible ways to figure out the data.  And I need to have consistent addresses
+again to do future processing.   The answer to this and all other problens with the data,  is snobol.
+<p>
+Snobol4 is a legacy programming language that is not known by many people.  It does not have if statements,
+while statements, or any structure.  One must use goto's to process it.  Snobol4 is compiled on the 
+fly,  but it is very very slow.   However,  despite these problems,  it is the most powerful, concise, 
+and understandable computer language ever made.  And it is perfect to handle this cruddy data.<p>
+Snobol's statements can define patterns as a first class datatype,  in language similar to Baccus Noir Form.
+<p> I have a snobol program that converts this low quality input data into a perfect set
+of vertical bar separated values,  with each field well defined.  It took 528 lines of code.
+It would be 5000 lines in C, and probably 3000 lines in perl!<p>
+The only problem with snobol is it's processing speed.  
+I think I got 2,000 lines a second, all CPU bound.  This would take days of processing to do. <p>
+<p>
+So I decided to work the multiple cores.<p>
+<h2>Splitting up the work load</h2>
+To split a file,  Unix has a split command which will separate into several files after a 
+certain size, or a certain number of lines.  Then these files could each be processed.
+But to use this,  you need to know the number of lines to begin with.  Also,  you are copying these
+temporary files back out to disk,  wasting alot of time.  With the source file being 14 gigabytes, 
+It has to be faster.  So I wrote flip_flop.
+flip_flop will read from standard input,  then alternate printing the line to either
+standard output or standard error.  This allows it to feed two slow jobs (like the snobol programs)
+from a stream, in real time.   flip_flop was also expanded to upen the lesser used file
+descriptors - 3 through 9, in order to make use of all cores- 6 in this case.
+The unix pipe command only links up standard output.  So named pipes can be used to bind
+6 snobol processes to the 6 feeds coming out of flip_flop:
+
+<pre>
+mknod /tmp/p1$$ p
+mknod /tmp/p2$$ p
+mknod /tmp/p3$$ p
+mknod /tmp/p4$$ p
+mknod /tmp/p5$$ p
+mknod /tmp/p6$$ p
+{
+flip_flop &lt;../common/leads.txt &gt;/tmp/p1$$ 2&gt;/tmp/p2$$ 3&gt;/tmp/p3$$ 4&gt;/tmp/p4$$ 5&gt;/tmp/p5$$ 6&gt;/tmp/p6$$ 6 &
+snobol4 -b name.sno &lt;/tmp/p1$$ &gt;../common/x.txt &
+snobol4 -b name.sno &lt;/tmp/p2$$ &gt;x2.txt &
+snobol4 -b name.sno &lt;/tmp/p3$$ &gt;x3.txt &
+snobol4 -b name.sno &lt;/tmp/p4$$ &gt;x4.txt &
+snobol4 -b name.sno &lt;/tmp/p5$$ &gt;x5.txt &
+snobol4 -b name.sno &lt;/tmp/p6$$ &gt;x6.txt &
+}
+wait
+cat &gt;&gt;../common/x.txt x2.txt x3.txt x4.txt x5.txt x6.txt
+rm -rf 2&gt;/dev/null x2.txt x3.txt x4.txt x5.txt x6.txt
+</pre>
+
+
+I never wrote the opposite of flip_flop,  which combines the streams together on the other side.  I probably should do that, as it will also save time.
+<p>
+This reduced the processing to less than a day.
+
+
+<h2>
+field
+</h2>
+I was processing the fields, and rearranging them with a command such as
+<pre>
+awk &lt;l002.txt -F | '{print $3,$2,$4}'
+</pre>
+A little program to make the third, second, and fourth fields of a file come out in that particular
+ order.Which worked pretty well.  the problem was that the job was pretty cpu intensive, and pretty slow.  So I made one of the first 
+C processing programs called field.  It is pretty simple-- you can just provide the field numbers
+you want, and it will print them out.
+<p> Not just for speed,  but also for convienence, and readibility,  I built field.c to make this stramlined.
+<pre>
+field &lt;l002.txt 3 2 4
+</pre>
+<h2>
+fieldu
+</h2>
+In many cases,  I needed to know the unique names of various fields,  such as: what are the valid first names,
+what are the listed states,  what are the zip codes, etc.  I was getting this information as follows:<p>
+List of zip codes:
+<pre>
+field &lt;l002.txt 16 | sort -u
+</pre>
+Well, the sort took a long time,  and did the sorting via the english language without specifying it.
+And it seemed like alot of work to sort 80 million records just to get 50,000 results.
+If one could use a hash table to keep track of the values,  one could make the result computed in a single pass.
+And it could be combined with the field command, as field is rearranging the order of the files anyways
+to make these things.
+The result was fieldu.c - this utilized uthash.h to parse the list of unique fields quickly.
+<p>
+<pre>
+fieldu &lt;l002.txt 16
+</pre>
+It worked great, I added the option -s to sort the values, as hash tables are not always sorted.
+I also allowed clipping of a value - say you wanted just the firt 5 digits of the zip code:<p>
+<pre>
+fieldu &lt;l002.txt -l5 16
+</pre>
+This was much faster than sort.  But it did not really solve all my needs.  It turned out that I usually needed to know the number
+of records that had the given code.  For example:
+<pre>
+54901|20138
+54902|14326
+...
+</pre>
+How was I going to get the count back?
+<h2>fielduc</h2>
+fielduc - or field unique count was designed to add a count of the number of ocurrences of each field
+in the main file.  And it expanded to have many more options to be used later on.  fielduc can handle cases
+where there are hundreds of million, or even a billion unique fields to count,  can include or exclude
+records where a certain field is filled in.
+
+To be continued...
+

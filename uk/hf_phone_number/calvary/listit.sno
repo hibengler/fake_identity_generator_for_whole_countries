@@ -1,0 +1,260 @@
+#
+# Fake Identity Generator
+# Copyright (C) 2011-2016 Hibbard M. Engler (Bitcoin address 1ERDHsxtekdh5FAsxdb92PBFK7nnuwMkbp for gifts)
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+
+	define('handle_de(abc,de)a,b,c,d,e')
+	define('handle_clause(abc,de,f)a,b,c,d,e')
+
+	separator = '|'
+	number = '0123456789'
+	
+	digit = any(number)
+	digits = span(number)
+	
+	ac = digits
+	de = ( digits . defrom '-' digits . deto ) | ( digits )
+	mf = ( digits . ffrom '-' digits . fto ) | ( digits . thef ) | '&nbsp;' | '&nbsp' | ''
+	mg = 'Allocated'
+	
+	quote = char(39)
+	alpha = &alphabet
+	&anchor = 0
+	alpha separator = ''
+	cprov = span(alpha)
+	xlength = ( '(0)+' digits . thelength ) | ( digits . thelength1 '+' digits . thelength2 ) | 
++                   ( digits . thelength )
+	xdate = span(alpha) | ''
+	aa = arbno(any(alpha))
+	
+	cc = arbno(any(' ')) ',' arbno(any(' ')) 
+	equote = arbno(any(' ')) ( span(quote) | '' )
+	bquote = quote | ''
+	
+	fclause1 = bquote digits . theclause1 equote
+	fclause2 = bquote digits . theclausefrom '-' digits . theclauseto equote
+	fclause3 = bquote digits . theclause1 cc digits . theclause2 equote
+	fclause4 = bquote digits . theclause1 cc digits . theclause2 
++                        cc digits . theclause3 equote
+	fclause5 = bquote digits . theclause1 cc digits . theclause2 
++                        cc digits . theclause3 cc digits . theclause4 equote
+	fclause6 = bquote digits . theclause1 cc digits . theclause2 
++                        cc digits . theclause3 cc digits . theclause4 
++                        cc digits . theclause5 equote
+	fclause7 = bquote digits . theclause1 cc digits . theclause2 
++                        cc digits . theclause3 cc digits . theclause4 
++                        cc digits . theclause5 cc digits . theclause6 equote
+	fclause8 = bquote digits . theclause1 cc digits . theclause2 
++                        cc digits . theclause3 cc digits . theclause4 
++                        cc digits . theclause5 cc digits . theclause6
++                        cc digits . theclause7 equote
+	fclause9 = bquote digits . theclause1 cc digits . theclause2 
++                        cc digits . theclause3 cc digits . theclause4 
++                        cc digits . theclause5 cc digits . theclause6
++                        cc digits . theclause7 cc digits . theclause8 equote
+	fclause10 = bquote digits . theclause1 cc digits . theclause2 
++                        cc digits . theclause3 cc digits . theclause4 
++                        cc digits . theclause5 cc digits . theclause6
++                        cc digits . theclause7 cc digits . theclause8 
++                        cc digits . theclause9 equote
+	fclause11 = bquote digits . theclause1 cc digits . theclause2 
++                        cc digits . theclause3 cc digits . theclause4 
++                        cc digits . theclause5 cc digits . theclause6
++                        cc digits . theclause7 cc digits . theclause8 
++                        cc digits . theclause9 cc digits . theclause10 equote
+
+	fclause = fclause11 | fclause10 | fclause9 | fclause8 | fclause7 | fclause6 | fclause5 | fclause4 | fclause3
++			| fclause2 | fclause1
+
+	notes1 = ('F-Digits ' | 'F-Digit ' | 'F-Diigit ' | 'F-digits ' ) fclause | ''
+	s = separator
+	
+	line = ac . theac s de . thede s mf s mg s aa s cprov . thecprov s xlength s
++               xdate s notes1 rpos(0)
+
+	
+	&anchor = 1
+	
+loop	x = input	:f(endd)
+
+	
+	'clear' '' . defrom '' . deto '' . ffrom '' . fto '' . thelength '' . thelength1 '' . thelength2
+	'clear' '' . theclause1 '' . theclausefrom '' . theclauseto '' . theclause2
+	'clear' '' . theclause3 '' . theclause4 '' . theclause5 '' . theclause6 '' . theclause7
+	'clear' '' . theclause8 '' . theclause9 '' . theclause10
+	'clear' '' . thef '' 
+	
+	x	line	:f(bad)
+	
+	
+* compute the length
+	thelength1 '' rpos(0) :s(lengthcool2)
+	
+	thelength = thelength1 + thelength2
+	:(lengthcool)
+lengthcool2
+	thelength '' rpos(0) :s(thelengthuncool)
+	:(lengthcool)
+	
+thelengthuncool
+	thelength = 10
+
+lengthcool
+
+
+
+
+	deto '' rpos(0)  :s(desimple)
+
+	xlen = size(defrom)
+	i = defrom
+deloop	
+deloop2	
+	ge(size(i),size(defrom))	:s(deone)
+	i = '0' i			:(deloop2)	
+deone
+	le(i,deto)	:f(loopfinished)
+	junk = handle_de(theac,i)
+	i = i + 1
+	:(deloop)
+	
+desimple	
+	junk = handle_de(theac,thede)
+
+
+loopfinished
+
+
+	:(loop)	
+		
+
+
+
+bad
+	x aa . a s aa . b s aa . c s aa . d s aa . e s aa . f s aa . g s aa . h s aa . i rpos(0)
+	
+	d 'Allocated'  :f(loop)
+
+	output = 'bad ' x
+	a ac rpos(0)	:s(bad2)
+	output = 'ac bad ' a
+bad2	b de rpos(0)	:s(bad3)
+	output = 'de bad ' b
+bad3	c mf rpos(0)	:s(bad4)
+	output = 'f bad ' c
+bad4	d mg rpos(0)	:s(bad5)
+	output = ' g bad ' d
+bad5	f cprov	rpos(0) :s(bad6)
+	output = 'cprov bad ' f
+bad6	g xlength rpos(0)	:s(bad7)
+	output = 'xlength ' g
+bad7	h xdate	rpos(0) :s(bad8)
+	output = 'xdate ' h
+bad8	i notes1 rpos(0) :s(bad10)
+	output = 'notes1 ' i
+bad10
+
+*	line = ac . theac s de . thede s f . thef s g s span(alpha) s cprov . thecprov s xlength s
+*+               xdate s notes1 rpos(0)
+
+	:(loop)
+
+	
+		
+			
+				
+handle_de
+	clause_count = 0
+	theclause1 '' rpos(0)	:s(h1)
+	handle_clause(abc,de,theclause1)
+h1	theclause2 '' rpos(0) :s(h2)
+	handle_clause(abc,de,theclause2)
+h2	theclause3 '' rpos(0) :s(h3)
+	handle_clause(abc,de,theclause2)
+h3	theclause4 '' rpos(0) :s(h4)
+	handle_clause(abc,de,theclause2)
+h4	theclause5 '' rpos(0) :s(h5)
+	handle_clause(abc,de,theclause2)
+h5	theclause6 '' rpos(0) :s(h6)
+	handle_clause(abc,de,theclause2)
+h6	theclause7 '' rpos(0) :s(h7)
+	handle_clause(abc,de,theclause2)
+h7	theclause8 '' rpos(0) :s(h8)
+	handle_clause(abc,de,theclause2)
+h8	theclause9 '' rpos(0) :s(h9)
+	handle_clause(abc,de,theclause2)
+h9	theclause10 '' rpos(0) :s(h10)
+	handle_clause(abc,de,theclause2)
+h10	
+	theclauseto '' rpos(0) :s(h11)
+	a = size(theclausefrom)
+	b = theclausefrom
+hloop1	
+	ge(size(b),size(theclausefrom))	:s(hdone)
+	b = '0' b	:(hloop1)
+hdone
+	le(b,theclauseto)	:f(hfinished)
+	handle_clause(abc,de,b)
+	b = b + 1
+	:(hloop1)
+
+h11	
+hfinished
+* looped with from,to, for F-digit, now for the f field
+	fto '' rpos(0)	:s(h12)
+	a = size(ffrom)
+	b = ffrom
+hloop2
+	ge(size(b),size(ffrom))	:s(hdone2)
+	b = '0' b	:(hloop2)
+hdone2
+	le(b,fto)		:f(h12)
+	handle_clause(abc,de,b)
+	b = b + 1
+	:(hloop2)
+h12
+	thef '' rpos(0)	:s(h13)
+	handle_clause(abc,de,thef)
+h13
+* need to handle clause at least once
+	eq(clause_count,0)	:f(h14)
+	handle_clause(abc,de,'')
+h14		
+	
+	:(return)
+						
+
+							
+handle_clause
+	clause_count = clause_count + 1
+	a = abc de f
+	b = abc de f
+* add needed zeros and nines
+hc1
+	ge(size(a),thelength)	:s(hc2)
+	a = a '0'
+	b = b '9'
+	:(hc1)
+hc2
+	output = a s b 
+	:(return)
+
+endd
+
+end	
+	
+	

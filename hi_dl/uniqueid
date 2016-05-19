@@ -1,0 +1,3177 @@
+#! /usr/bin/perl -wT
+
+# Unique ID
+#
+# Experimental implementation for algorithms as described on the Unique ID web
+# site (http://www.highprogrammer.com/alan/numbers/)
+#
+# This program is intended to be run as a CGI (Common Gateway Interface)
+# running under a web server like Apache (http://www.apache.org).  You can find
+# further information about CGIs here http://hoohoo.ncsa.uiuc.edu/cgi/ You will
+# want to consult the documentation for your web server for details on how to
+# install a CGI.  This program requires Perl (http://www.perl.org/) and the
+# Perl modules CGI (http://search.cpan.org/search?dist=CGI.pm) and
+# Text::Soundex (http://search.cpan.org/search?dist=Text-Soundex).
+#
+# The author is not able to help with installation of a web server, perl, perl
+# modules, or CGI programs.
+#
+# Copyright 2002-2004 Alan De Smet http://www.highprogrammer.com/alan/email.html
+#
+# This file is part of UniqueID.
+#
+# UniqueID is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+# 
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
+# 
+# You should have received a copy of the GNU General Public License along with
+# this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+# Place, Suite 330, Boston, MA  02111-1307  USA
+#
+# A copy of the GNU General Public License should have been distributed with
+# this file.  You should be able to find it in the file named COPYING.txt
+
+
+use CGI qw(param);
+use Text::Soundex;
+use strict;
+
+
+# You can optionally set this to the URL to a CSS file to
+# use to style the output.
+my $CSS_URL = undef;
+#$CSS_URL = 'http://www.this.is.an.example.com/uniqueid.css';
+
+
+
+
+
+
+$CGI::POST_MAX = 1024*64; # Ensure we don't read bunches of garbage.
+$CGI::DISABLE_UPLOADS = 1; # There is no reason to accept uploads.
+
+my $PROGRAM_NAME = 'Unique ID';
+my $COPYRIGHT_YEAR = '2004';
+my $VERSION;
+BEGIN {
+	my $ASSIGNED_VERSION = '0.5.0';
+	my $CVS_VERSION = '$Revision$';
+	my($cvs_bits) = ($CVS_VERSION =~ /Revision: ([\d.]+)/);
+	$VERSION = "$ASSIGNED_VERSION/$cvs_bits";
+}
+
+my $INTERNAL_CSS = 'internal.css';
+
+#===============================================================================
+my(%DLFMR_FIRST_MALE) = (
+	20=>['Albert'], 40=>['Arthur'], 80=>['Bernard'], 120=>['Carl'],
+	140=>['Charles'], 180=>['Donald'], 220=>['Edward'], 260=>['Frank'],
+	300=>['George'], 340=>['Harold'], 360=>['Harry'], 380=>['Henry'],
+	440=>['James'], 460=>['John'], 480=>['Joseph'], 560=>['Martin'],
+	580=>['Marvin'], 600=>['Melvin'], 680=>['Paul'], 740=>['Richard'],
+	760=>['Robert'], 820=>['Thomas'], 900=>['Walter'], 920=>['William'],
+	);
+my(%DLFMR_FIRST_FEMALE) = (
+	20=>['Alice'], 40=>['Ann', 'Anna', 'Anne', 'Annie'],
+	80=>['Bette', 'Bettie', 'Betty'], 120=>['Catherine'],
+	140=>['Clara'], 180=>['Dorothy'], 220=>['Elizabeth'],
+	260=>['Florence'], 300=>['Grace'], 340=>['Harriet'],
+	360=>['Hazel'], 380=>['Helen'], 440=>['Jane', 'Jayne'],
+	460=>['Jean'], 480=>['Joan'], 580=>['Mary'], 600=>['Mildred'],
+	680=>['Patricia'], 740=>['Ruby'], 760=>['Ruth'], 820=>['Thelma'],
+	900=>['Wanda'], 920=>['Wilma'],
+	);
+my(%DLFMR_FIRST_INIT) = (
+	0 => 'A', 60 => 'B', 100 => 'C', 160 => 'D', 200 => 'E', 240 => 'F',
+	280 => 'G', 320 => 'H', 400 => 'I', 420 => 'J', 500 => 'K', 520 => 'L',
+	540 => 'M', 620 => 'N', 640 => 'O', 660 => 'P', 700 => 'Q', 720 => 'R',
+	780 => 'S', 800 => 'T', 840 => 'U', 860 => 'V', 880 => 'W', 940 => 'X',
+	960 => 'Y', 980 => 'Z',
+	);
+my(%DLFMR_MIDDLE_INIT) = (
+	0 => [' ', ''],
+	1 => [qw(A)], 2 => [qw(B)], 3 => [qw(C)], 4 => [qw(D)],
+	5 => [qw(E)], 6 => [qw(F)], 7 => [qw(G)], 8 => [qw(H)],
+	9 => [qw(I)], 10 => [qw(J)], 11 => [qw(K)], 12 => [qw(L)],
+	13 => [qw(M)], 14 => [qw(N O)], 15 => [qw(P Q)], 16 => [qw(R)],
+	17 => [qw(S)], 18 => [qw(T U V)], 19 => [qw(W X Y Z)],
+	);
+
+my(%DLFM_FIRST_MALE) = uc_hash_keys(reverse_plural_hash(%DLFMR_FIRST_MALE));
+my(%DLFM_FIRST_FEMALE) = uc_hash_keys(reverse_plural_hash(%DLFMR_FIRST_FEMALE));
+my(%DLFM_FIRST_INIT) = uc_hash_keys(reverse_hash(%DLFMR_FIRST_INIT));
+my(%DLFM_MIDDLE_INIT) = uc_hash_keys(reverse_plural_hash(%DLFMR_MIDDLE_INIT));
+
+
+
+
+# Machine Readable Travel Documents Country Codes
+my(%COUNTRY_TO_ALPHA3) = (
+	"Afghanistan" => 'AFG',
+	"Albania" => 'ALB',
+	"Algeria" => 'DZA',
+	"American Samoa" => 'ASM',
+	"Andorra" => 'AND',
+	"Angola" => 'AGO',
+	"Anguilla" => 'AIA',
+	"Antarctica" => 'ATA',
+	"Antigua and Barbuda" => 'ATG',
+	"Argentina" => 'ARG',
+	"Armenia" => 'ARM',
+	"Aruba" => 'ABW',
+	"Australia" => 'AUS',
+	"Austria" => 'AUT',
+	"Azerbaijan" => 'AZE',
+	"Bahamas" => 'BHS',
+	"Bahrain" => 'BHR',
+	"Bangladesh" => 'BGD',
+	"Barbados" => 'BRB',
+	"Belarus" => 'BLR',
+	"Belgium" => 'BEL',
+	"Belize" => 'BLZ',
+	"Benin" => 'BEN',
+	"Bermuda" => 'BMU',
+	"Bhutan" => 'BTN',
+	"Bolivia" => 'BOL',
+	"Bosnia and Herzegovina" => 'BIH',
+	"Botswana" => 'BWA',
+	"Bouvet Island" => 'BVT',
+	"Brazil" => 'BRA',
+	"British Indian Ocean Territory" => 'IOT',
+	"Brunei Darussalam" => 'BRN',
+	"Bulgaria" => 'BGR',
+	"Burkina Faso" => 'BFA',
+	"Burundi" => 'BDI',
+	"Cambodia" => 'KHM',
+	"Cameroon" => 'CMR',
+	"Canada" => 'CAN',
+	"Cape Verde" => 'CPV',
+	"Cayman Islands" => 'CYM',
+	"Central African Republic" => 'CAF',
+	"Chad" => 'TCD',
+	"Chile" => 'CHL',
+	"China" => 'CHN',
+	"Christmas Island" => 'CXR',
+	"Cocos (Keeling) Islands" => 'CCK',
+	"Colombia" => 'COL',
+	"Comoros" => 'COM',
+	"Congo" => 'COG',
+	"Cook Islands" => 'COK',
+	"Costa Rica" => 'CRI',
+	"C&ocirc;te d'Ivoire" => 'CIV',
+	"Croatia" => 'HRV',
+	"Cuba" => 'CUB',
+	"Cyprus" => 'CYP',
+	"Czech Republic" => 'CZE',
+	"Democratic People's Republic of Korea" => 'PRK',
+	"Democratic Republic of the Congo" => 'COD',
+	"Denmark" => 'DNK',
+	"Djibouti" => 'DJI',
+	"Dominica" => 'DMA',
+	"Dominican Republic" => 'DOM',
+	"East Timor" => 'TMP',
+	"Ecuador" => 'ECU',
+	"Egypt" => 'EGY',
+	"El Salvador" => 'SLV',
+	"Equatorial Guinea" => 'GNQ',
+	"Eritrea" => 'ERI',
+	"Estonia" => 'EST',
+	"Ethiopia" => 'ETH',
+	"Falkland Islands (Malvinas)" => 'FLK',
+	"Faeroe Islands" => 'FRO',
+	"Fiji" => 'FJI',
+	"Finland" => 'FIN',
+	"France" => 'FRA',
+	"France, Metropolitan" => 'FXX',
+	"French Guiana" => 'GUF',
+	"French Polynesia" => 'PYF',
+	"Gabon" => 'GAB',
+	"Gambia" => 'GMB',
+	"Georgia" => 'GEO',
+	"Germany" => 'D',
+	"Ghana" => 'GHA',
+	"Gibraltar" => 'GIB',
+	"Greece" => 'GRC',
+	"Greenland" => 'GRL',
+	"Grenada" => 'GRD',
+	"Guadeloupe" => 'GLP',
+	"Guam" => 'GUM',
+	"Guatemala" => 'GTM',
+	"Guinea" => 'GIN',
+	"Guinea-Bissau" => 'GNB',
+	"Guyana" => 'GUY',
+	"Haiti" => 'HTI',
+	"Heard and McDonald Islands" => 'HMD',
+	"Holy See (Vatican City State)" => 'VAT',
+	"Honduras" => 'HND',
+	"Hong Kong" => 'HKG',
+	"Hungary" => 'HUN',
+	"Iceland" => 'ISL',
+	"India" => 'IND',
+	"Indonesia" => 'IDN',
+	"Iran, Islamic Republic of" => 'IRN',
+	"Iraq" => 'IRQ',
+	"Ireland" => 'IRL',
+	"Israel" => 'ISR',
+	"Italy" => 'ITA',
+	"Jamaica" => 'JAM',
+	"Japan" => 'JPN',
+	"Jordan" => 'JOR',
+	"Kazakhstan" => 'KAZ',
+	"Kenya" => 'KEN',
+	"Kiribati" => 'KIR',
+	"Kuwait" => 'KWT',
+	"Kyrgyzstan" => 'KGZ',
+	"Lao People's Democratic Republic" => 'LAO',
+	"Latvia" => 'LVA',
+	"Lebanon" => 'LBN',
+	"Lesotho" => 'LSO',
+	"Liberia" => 'LBR',
+	"Libyan Arab Jamahiriya" => 'LBY',
+	"Liechtenstein" => 'LIE',
+	"Lithuania" => 'LTU',
+	"Luxembourg" => 'LUX',
+	"Madagascar" => 'MDG',
+	"Malawi" => 'MWI',
+	"Malaysia" => 'MYS',
+	"Maldives" => 'MDV',
+	"Mali" => 'MLI',
+	"Malta" => 'MLT',
+	"Marshall Islands" => 'MHL',
+	"Martinique" => 'MTQ',
+	"Mauritania" => 'MRT',
+	"Mauritius" => 'MUS',
+	"Mayotte" => 'MYT',
+	"Mexico" => 'MEX',
+	"Micronesia, Federated States of" => 'FSM',
+	"Monaco" => 'MCO',
+	"Mongolia" => 'MNG',
+	"Montserrat" => 'MSR',
+	"Morocco" => 'MAR',
+	"Mozambique" => 'MOZ',
+	"Myanmar" => 'MMR',
+	"Namibia" => 'NAM',
+	"Nauru" => 'NRU',
+	"Nepal" => 'NPL',
+	"Netherlands, Kingdom of the" => 'NLD',
+	"Netherlands Antilles" => 'ANT',
+	"Neutral Zone" => 'NTZ',
+	"New Caledonia" => 'NCL',
+	"New Zealand" => 'NZL',
+	"Nicaragua" => 'NIC',
+	"Niger" => 'NER',
+	"Nigeria" => 'NGA',
+	"Niue" => 'NIU',
+	"Norfolk Island" => 'NFK',
+	"Northern Mariana Islands" => 'MNP',
+	"Norway" => 'NOR',
+	"Oman" => 'OMN',
+	"Pakistan" => 'PAK',
+	"Palau" => 'PLW',
+	"Panama" => 'PAN',
+	"Papua New Guinea" => 'PNG',
+	"Paraguay" => 'PRY',
+	"Peru" => 'PER',
+	"Philippines" => 'PHL',
+	"Pitcairn" => 'PCN',
+	"Poland" => 'POL',
+	"Portugal" => 'PRT',
+	"Puerto Rico" => 'PRI',
+	"Qatar" => 'QAT',
+	"Republic of Korea" => 'KOR',
+	"Republic of Moldova" => 'MDA',
+	"R&eacute;union" => 'REU',
+	"Romania" => 'ROM',
+	"Russian Federation" => 'RUS',
+	"Rwanda" => 'RWA',
+	"Saint Helena" => 'SHN',
+	"Saint Kitts and Nevis" => 'KNA',
+	"Saint Lucia" => 'LCA',
+	"Saint Pierre and Miquelon" => 'SPM',
+	"Saint Vincent and the Grenadines" => 'VCT',
+	"Samoa" => 'WSM',
+	"San Marino" => 'SMR',
+	"Sao Tome and Principe" => 'STP',
+	"Saudi Arabia" => 'SAU',
+	"Senegal" => 'SEN',
+	"Seychelles" => 'SYC',
+	"Sierra Leone" => 'SLE',
+	"Singapore" => 'SGP',
+	"Slovakia" => 'SVK',
+	"Slovenia" => 'SVN',
+	"Solomon Islands" => 'SLB',
+	"Somalia" => 'SOM',
+	"South Africa" => 'ZAF',
+	"South Georgia and the South Sandwich Island" => 'SGS',
+	"Spain" => 'ESP',
+	"Sri Lanka" => 'LKA',
+	"Sudan" => 'SDN',
+	"Suriname" => 'SUR',
+	"Svalbard and Jan Mayen Islands" => 'SJM',
+	"Swaziland" => 'SWZ',
+	"Sweden" => 'SWE',
+	"Switzerland" => 'CHE',
+	"Syrian Arab Republic" => 'SYR',
+	"Taiwan Province of China" => 'TWN',
+	"Tajikistan" => 'TJK',
+	"Thailand" => 'THA',
+	"The former Yugoslav Republic of Macedonia" => 'MKD',
+	"Togo" => 'TGO',
+	"Tokelau" => 'TKL',
+	"Tonga" => 'TON',
+	"Trinidad and Tobago" => 'TTO',
+	"Tunisia" => 'TUN',
+	"Turkey" => 'TUR',
+	"Turkmenistan" => 'TKM',
+	"Turks and Caicos Islands" => 'TCA',
+	"Tuvalu" => 'TUV',
+	"Uganda" => 'UGA',
+	"Ukraine" => 'UKR',
+	"United Arab Emirates" => 'ARE',
+	"United Kingdom of Great Britain and Northern Ireland - Citizen" => 'GBR',
+	"United Kingdom of Great Britain and Northern Ireland - Dependent territories citizen" => 'GBD',
+	"United Kingdom of Great Britain and Northern Ireland - National (overseas)" => 'GBN',
+	"United Kingdom of Great Britain and Northern Ireland - Overseas citizen" => 'GBO',
+	"United Kingdom of Great Britain and Northern Ireland - Protected Person" => 'GBP',
+	"United Kingdom of Great Britain and Northern Ireland - Subject" => 'GBS',
+	"United Republic of Tanzania" => 'TZA',
+	"United States of America" => 'USA',
+	"United States of America Minor Outlying Islands" => 'UMI',
+	"Uruguay" => 'URY',
+	"Uzbekistan" => 'UZB',
+	"Vanuatu" => 'VUT',
+	"Venezuela" => 'VEN',
+	"Viet Nam" => 'VNM',
+	"Virgin Islands (Great Britian)" => 'VGB',
+	"Virgin Islands (United States)" => 'VIR',
+	"Wallis and Futuna Islands" => 'WLF',
+	"Western Sahara" => 'ESH',
+	"Yemen" => 'YEM',
+	"Zaire" => 'ZAR',
+	"Zambia" => 'ZMB',
+	"Zimbabwe" => 'ZWE',
+	"United Nations" => 'UNO',
+	"United Nations Specialized Agency" => 'UNA',
+	"Stateless" => 'XXA',
+	"Refugee (1951 convention)" => 'XXB',
+	"Refugee (non-convention)" => 'XXC',
+	"Unspecified / Unknown" => 'XXX',
+	"Utopia (Example!)" => 'UTO',
+);
+my(%ALPHA3_TO_COUNTRY) = reverse_hash(%COUNTRY_TO_ALPHA3);
+
+
+#===============================================================================
+sub html_escape {
+	local($_) = @_;
+	if(not defined $_) { $_ = ''; }
+	s/\&/\&amp;/g;
+	s/\>/\&gt;/g;
+	s/\</\&lt;/g;
+	return $_;
+}
+
+#===============================================================================
+sub uc_hash_keys {
+	my(%hash) = @_;
+	my %result;
+	foreach my $key (keys %hash) {
+		$result{uc($key)} = $hash{$key}
+	}
+	return %result;
+}
+
+#===============================================================================
+sub reverse_plural_hash {
+	my(%hash) = @_;
+	my %result;
+	foreach my $key (keys %hash) {
+		foreach my $value (@{$hash{$key}}) {
+			$result{$value} = $key;
+		}
+	}
+	return %result;
+}
+
+#===============================================================================
+sub reverse_hash {
+	my(%hash) = @_;
+	my %result;
+	foreach my $key (keys %hash) {
+		$result{$hash{$key}} = $key;
+	}
+	return %result;
+}
+
+#===============================================================================
+sub english_list_join {
+	my($word, @list) = @_;
+	if(scalar @list == 0) {
+		return '';
+	}
+	if(scalar @list == 1) {
+		return $list[0];
+	}
+	if(scalar @list == 2) {
+		return "$list[0] $word $list[1]";
+	}
+	my $tail = pop @list;
+	return (join ', ', @list).", $word $tail";
+}
+
+#===============================================================================
+sub dlfirstmiddle_middle_from_code {
+	my($code) = @_;
+	$code %= 20;
+	if(not exists $DLFMR_MIDDLE_INIT{$code}) {
+		return '';
+	}
+
+	my(@answer) = @{$DLFMR_MIDDLE_INIT{$code}};
+
+	return english_list_join('or', @answer);
+}
+
+#===============================================================================
+sub dlfirstmiddle_first_from_code {
+	my($code, $gender) = @_;
+	$code -= $code % 20;
+	my(@female, @male);
+	if(exists $DLFMR_FIRST_FEMALE{$code}) {
+		@female = @{$DLFMR_FIRST_FEMALE{$code}};
+	}
+	if(exists $DLFMR_FIRST_MALE{$code}) {
+		@male = @{$DLFMR_FIRST_MALE{$code}};
+	}
+
+	my(@probable, @improbable);
+	if($gender =~ /^m/i) {
+		@probable = @male;
+		@improbable = @female;
+	} elsif($gender =~ /^f/i) {
+		@probable = @female;
+		@improbable = @male;
+	} else {
+		@probable = (@male, @female);
+	}
+
+	if(not @probable and exists $DLFMR_FIRST_INIT{$code}) {
+		@probable = ($DLFMR_FIRST_INIT{$code}.'.');
+	}
+
+	my $return = english_list_join('or', @probable);
+	if(scalar @improbable) {
+		$return .= ' (or possibly '.
+			english_list_join('or', @improbable).')';
+	}
+	return $return;
+}
+
+#===============================================================================
+sub dlfirstmiddle_encode {
+	my($FN, $MiddleInit) = @_;
+	my($NameNum) = 0;
+
+	$FN = uc($FN);
+	$MiddleInit = uc($MiddleInit);
+	my($first_init)= ($FN =~ /^(.)/);
+
+	if(exists $DLFM_FIRST_MALE{$FN}) {
+		$NameNum = $DLFM_FIRST_MALE{$FN};
+	} elsif(exists $DLFM_FIRST_FEMALE{$FN}) {
+		$NameNum = $DLFM_FIRST_FEMALE{$FN};
+	} elsif(exists $DLFM_FIRST_INIT{$first_init}) {
+		$NameNum = $DLFM_FIRST_INIT{$first_init};
+	} else {
+		return 'BAD';
+	}
+
+	if(defined($DLFM_MIDDLE_INIT{$MiddleInit}))
+		{ $NameNum += $DLFM_MIDDLE_INIT{$MiddleInit}; }
+	else
+		{ return('BAD'); }
+
+	return sprintf("%03d",$NameNum);
+}
+
+#===============================================================================
+sub soundex_database { '/home/chaos/public/soundex.data' }
+
+
+#===============================================================================
+sub soundex_similar_last_names
+{
+	my($Soundex) = @_;
+	my($database) = main::soundex_database();
+	open(INDEX,$database) or
+		return "Name database is currently unavailable.  ".
+		"Unable to display name guesses. Please try again later.".
+		"($database  $!)"
+		;
+	main::look(*INDEX, $Soundex, 0, 0);
+	my $line = <INDEX>;
+	close(INDEX);
+	($line) = ($line =~ /.+\t(.+)/);
+	my(@names) = split(/, ?/, $line);
+	foreach my $n (@names) {
+		$n =~ s/(\w+)/\u\L$1/g;
+	}
+	return @names;
+}
+
+#===============================================================================
+sub soundex_sound_guess
+{
+	my($Name) = @_;
+	my($Return, @Parts, $This);
+	@Parts = split(//,$Name);
+	$Return = shift(@Parts).'e';
+	while($This = shift(@Parts))
+	{
+		if   ($This == 1) { $Return .= 'be'; } #bfpv
+		elsif($This == 2) { $Return .= 'se'; } #cgjkqsxz
+		elsif($This == 3) { $Return .= 'te'; } #td
+		elsif($This == 4) { $Return .= 'le'; } #l
+		elsif($This == 5) { $Return .= 'me'; } #mn
+		elsif($This == 6) { $Return .= 're'; } #r
+	}
+	return($Return);
+}
+
+#===============================================================================
+sub describe_soundex
+{
+	my($Name) = @_;
+	my($Return, @Parts, $This);
+
+	@Parts = split(//,$Name);
+
+	$Return = 'Starts with a '.shift(@Parts);
+	while($This = shift(@Parts))
+	{
+		$Return .= ', followed by a ';
+		if   ($This == 1) { $Return .= 'labial (B, F, P, or V)'; }
+		elsif($This == 2) { $Return .= 'gutteral or sibilant (C, G, J, K, Q, S, X, or Z)'; }
+		elsif($This == 3) { $Return .= 'dental (D or T)'; }
+		elsif($This == 4) { $Return .= 'long liquid (L)'; }
+		elsif($This == 5) { $Return .= 'nasal (M or N)'; }
+		elsif($This == 6) { $Return .= 'short liquid (R)'; }
+	}
+	$Return .= '.';
+	return($Return);
+}
+
+#===============================================================================
+sub validate_options
+{
+	my($params, $options) = @_;
+	my(%params) = %{$params};
+	my(@options) = @{$options};
+	my($error, %error) = ('');
+	foreach my $option (@options) {
+		my($name, $key) = @{$option};
+		my($optional) = $option->[4]->{'optional'};
+		next if defined $optional and $optional;
+		next if not defined $key or not length $key;
+		my($value) = $params{$key};
+		if(not defined $value or not length $value) {
+			if(not defined $error{$key}) {
+				$error{$key} = '';
+			}
+			$error{$key} .= "Please specify $name. ";
+		}
+	}
+	return ($error, %error);
+}
+
+#===============================================================================
+sub email_link {
+	return qq(<a href="http://www.highprogrammer.com/alan/email.html">$_[0]</a>);
+}
+
+#===============================================================================
+sub html_alphaware {
+	my $link = email_link('contact me');
+	return <<ENDIT
+<p><strong>This algorithm is ALPHA grade. This algorithm is not yet well tested and may return wrong answers.</strong>
+Please $link with details if you are receiving incorrect results.
+ENDIT
+}
+
+#===============================================================================
+sub html_betaware {
+	my $link = email_link('contact me');
+	return <<ENDIT;
+<p><strong>This algorithm is BETA grade.  It is tested, but not yet thoroughly.</strong>
+Please $link with details if you are receiving incorrect results.
+ENDIT
+}
+
+#===============================================================================
+sub path_to_script {
+	return $ENV{'SCRIPT_NAME'} || '';
+}
+
+#===============================================================================
+sub format_label {
+	my($label) = @_;
+	my($indent) = ($label =~ /^( *)/);
+	$indent =~ s/ /\&nbsp;\&nbsp;\&nbsp;/g;
+	$label =~ s/^ */$indent/g;
+	return qq(<STRONG>$label:\&nbsp;</STRONG>);
+}
+
+#===============================================================================
+sub format_key_value {
+	my($key, $value) = @_;
+	return format_label($key).$value."<BR>\n";
+}
+
+#===============================================================================
+# Usage: &look(*FILEHANDLE,$key,$dict,$fold)
+# Sets file position in FILEHANDLE to be first line greater than or equal
+# (stringwise) to $key.  Pass flags for dictionary order and case folding.
+# taken from look.pl, part of perl distribution.
+
+sub look {
+	local(*FH, $_);
+	my($key, $dict, $fold);
+	(*FH,$key,$dict,$fold) = @_;
+	my($max,$min,$mid);
+	my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
+	   $blksize,$blocks) = stat(FH);
+	$min = 0;
+	$blksize = 8192 unless $blksize;
+	$key =~ s/[^\w\s]//g if $dict;
+	$key = lc $key if $fold;
+	$max = int($size / $blksize);
+	while ($max - $min > 1) {
+		$mid = int(($max + $min) / 2);
+		seek(FH,$mid * $blksize,0);
+		$_ = <FH> if $mid;		# probably a partial line
+		$_ = <FH>;
+		chop;
+		s/[^\w\s]//g if $dict;
+		$_ = lc $_ if $fold;
+		if ($_ lt $key) {
+			$min = $mid;
+		}
+		else {
+			$max = $mid;
+		}
+	}
+	$min *= $blksize;
+	seek(FH,$min,0);
+	<FH> if $min;
+	while (<FH>) {
+		chop;
+		s/[^\w\s]//g if $dict;
+		$_ = lc $_ if $fold;
+		last if $_ ge $key;
+		$min = tell(FH);
+	}
+	seek(FH,$min,0);
+	$min;
+}
+
+
+
+
+
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+
+
+
+package UniqueID::Coding::DLFirstMiddle;
+
+
+
+sub new {
+	my $class = shift;
+	$class = ref($class) if ref($class);
+
+	bless my $self = {}, $class;
+
+	return $self;
+}
+
+sub uid { 'c_firstmiddler' }
+sub display_name { "First Name Middle Initial Coding Analyzer" }
+sub describe {
+	my($link) = main::path_to_script();
+	return <<_EODESC;
+Decode
+<a href="http://www.highprogrammer.com/alan/numbers/dlfirstmiddle.html">name
+encoding</a> used by many states for driver's licenses.
+_EODESC
+#'
+}
+
+sub options
+{
+	return(
+		['Code', 'w', 'text', 3],
+	);
+}
+
+sub process
+{
+	my($self) = shift;
+	my(%params) = @_;
+	my($code) = $params{'w'};
+	my(%error_fields, $error_explain, $output);
+	
+	if(not defined $code or not length $code) {
+		$error_fields{'w'} .= "Please specify an encoded name.";
+	}
+
+	if((defined $error_explain and length $error_explain) or
+		scalar keys %error_fields){
+		return(\%error_fields, $error_explain, $output);
+	}
+
+	my $middle_init = main::dlfirstmiddle_middle_from_code($code);
+	my $first_name = main::dlfirstmiddle_first_from_code($code);
+
+	$output = 
+		main::format_key_value('First Name', $first_name).
+		main::format_key_value('Middle Initial', $middle_init);
+
+	return(\%error_fields, $error_explain, $output);
+}
+
+
+
+
+
+
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+
+
+
+package UniqueID::Coding::Soundex;
+
+
+sub new {
+	my $class = shift;
+	$class = ref($class) if ref($class);
+
+	bless my $self = {}, $class;
+
+	return $self;
+}
+
+sub uid { 'c_soundex' }
+sub display_name { "Soundex Coding" }
+sub describe {
+	my($link) = main::path_to_script();
+	return <<_EODESC;
+Given an english word, determine the
+<A HREF="http://www.highprogrammer.com/alan/numbers/soundex.html">soundex
+code</A>.  Soundex codes are used in many places, including
+<A HREF="http://www.highprogrammer.com/alan/numbers/dl_wi/">Wisconsin Driver's
+License Numbers</A>.
+_EODESC
+#'
+}
+
+sub options
+{
+	return(
+		["Word", 'w', 'text', 50],
+	);
+}
+
+sub process
+{
+	my($self) = shift;
+	my(%params) = @_;
+	my($word) = $params{'w'};
+	my(%error_fields, $error_explain, $output);
+	
+	if(not defined $word or not length $word) {
+		$error_fields{'w'} .= "Please specify an english word.";
+	}
+
+	if((defined $error_explain and length $error_explain) or
+		scalar keys %error_fields){
+		return(\%error_fields, $error_explain, $output);
+	}
+
+	my $soundex = main::soundex($word);
+
+	$output = main::format_key_value('Soundex', $soundex);
+
+	return(\%error_fields, $error_explain, $output);
+}
+
+
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+
+
+package UniqueID::DriversLicense::USShared;
+
+sub uid {
+	my $self = shift;
+	my $short = $self->state_short();
+	return "dl_".$short;
+}
+sub display_name {
+	my $self = shift;
+	my $long = $self->state_long();
+	return "Driver's License Calculator: $long"
+}
+sub describe_more { "" }
+
+sub describe {
+	my $self = shift;
+	my($link) = main::path_to_script();
+	my $state = $self->state_long();
+	my $state_short = $self->state_short();
+	my $state_short_r = $state_short.'r';
+	my $describe_more = $self->describe_more();
+	return <<_EODESC;
+<p>Calculate your $state Driver's License number from your
+information.
+<A HREF="http://www.highprogrammer.com/alan/numbers/dl_us_shared.html">How it works</A>.
+<A HREF="$link/dl_$state_short_r">Reverse analyze an existing number</A>.</p>
+$describe_more
+_EODESC
+}
+
+sub options
+{
+	my($self) = shift;
+	my @options;
+	push @options, ['First Name', 'first', 'text', 40]
+		if $self->need_first_name();
+	push @options, ['Middle Initial', 'middle', 'text', 1, {optional=>1}]
+		if $self->need_middle_initial();
+	push @options, ['Middle Name', 'middle', 'text', 40, {optional=>1}]
+		if $self->need_middle_name();
+	push @options, ['Last Name', 'last', 'text', 40]
+		if $self->need_last_name();
+	push @options, ['Gender', 'gender', 'select', {'Male' => 'M', 'Female' => 'F'} ]
+		if $self->need_gender();
+	push @options, ['Date of Birth']
+		if $self->need_dob_year() or $self->need_dob_month() or $self->need_dob_day() ;
+	push @options, [' Year', 'y', 'text', 4]
+		if $self->need_dob_year();
+	push @options, [' Month', 'm', 'text', 2]
+		if $self->need_dob_month();
+	push @options, [' Day', 'd', 'text', 2]
+		if $self->need_dob_day();
+	return @options;
+}
+
+sub need_last_name { return 1; }
+sub need_first_name { return 1; }
+sub need_middle_initial { return 1; }
+sub need_middle_name { return 0; }
+sub need_gender { return 1; }
+sub need_dob_year { return 1; }
+sub need_dob_month { return 1; }
+sub need_dob_day { return 1; }
+
+sub trim_edge_whitespace {
+	my($in) = @_;
+	if(not defined $in) {
+		return undef;
+	}
+	$in =~ s/^\s*//;
+	$in =~ s/\s*$//;
+	return $in;
+}
+
+sub process
+{
+	my($self) = shift;
+	my(%params) = @_;
+	my($last) = $params{'last'};
+	my($first) = $params{'first'};
+	my($middle) = $params{'middle'};
+	my($gender) = uc($params{'gender'});
+	my($yy) = $params{'y'};
+	my($mm) = $params{'m'};
+	my($dd) = $params{'d'};
+	my(%error_fields, $error_explain, $output);
+
+	($error_explain, %error_fields) =
+		main::validate_options(\%params, [$self->options()]);
+
+	$last = trim_edge_whitespace($last);
+	$middle = trim_edge_whitespace($middle);
+	$first = trim_edge_whitespace($first);
+
+	if($self->need_dob_year()) {
+		$yy -= 1900 if $yy >= 1900 and $yy < 2000;
+		$yy -= 2000 if $yy >= 2000 and $yy < 2100;
+
+		if($yy > 99 or $yy < 0) {
+			$error_fields{'y'} .= 'Please specify year of birth as a one or '.
+				'two digit number. '.
+				'For example, for 1975 specify "75", for 2006 specify "6".';
+		}
+	}
+
+	if($self->need_dob_month()) {
+		if($mm > 12 or $mm < 1) {
+			$error_fields{'m'} .= 'Please specify month of birth as a '.
+				'number from 1 to 12. '.
+				'For example, for January specify "1", for December specify "12".';
+		}
+	}
+
+	if($self->need_dob_day()) {
+		if($dd > 31 or $dd < 1) {
+			$error_fields{'d'} .= 'Please specify day of birth as a '.
+				'number from 1 to 31.';
+		}
+	}
+
+	if($self->need_gender()) {
+		if($gender ne 'M' and $gender ne 'F') {
+			$error_fields{'gender'} .= 'Please specify gender (M or F)';
+		}
+	}
+	
+	if((defined $error_explain and length $error_explain) or
+		scalar keys %error_fields){
+		return(\%error_fields, $error_explain, $output);
+	}
+
+	my $dl = $self->encode_drivers_license
+		($last, $first, $middle, $gender, $yy, $mm, $dd);
+
+	$output = main::format_key_value("Driver's License Number", $dl)."<p>".
+		$self->result_notes();
+
+	return(\%error_fields, $error_explain, $output);
+}
+
+sub encode_drivers_license {
+	my $self = shift;
+	my($last, $first, $middle, $gender, $yy, $mm, $dd) = @_;
+	$middle = substr $middle, 0, 1;
+	my($YearTens, $YearOnes) = split(//,sprintf("%02d",$yy));
+	my $dl = $self->format_license(
+		main::soundex($last),
+		dlfirstmiddle_encode($first, $middle),
+		$YearTens, $YearOnes,
+		$self->month_day_gender($mm, $dd, $gender));
+	return $dl;
+}
+
+sub month_day_gender
+{
+	my $self = shift;
+	my($Month, $Day, $Gender) = @_;
+	my($DateNo);
+	$Gender = uc($Gender);
+
+	$DateNo = ($Month - 1) * $self->month_mult() + $Day;
+	if($Gender eq 'F') { $DateNo += $self->female_add(); }
+
+	$DateNo = sprintf("%03d",$DateNo);
+
+	return($DateNo);
+}
+
+
+sub dlfirstmiddle_encode
+{
+	my($FN, $MiddleInit) = @_;
+	return main::dlfirstmiddle_encode($FN, $MiddleInit);
+}
+
+
+
+
+
+
+
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+
+
+package UniqueID::DriversLicense::USSharedReverse;
+
+
+
+sub new {
+	my $class = shift;
+	$class = ref($class) if ref($class);
+
+	bless my $self = {}, $class;
+
+	return $self;
+}
+
+
+sub uid {
+	my $self = shift;
+	my $short = $self->state_short();
+	return "dl_".$short."r";
+}
+sub display_name {
+	my $self = shift;
+	my $long = $self->state_long();
+	return "Driver's License Analyzer: $long"
+}
+
+sub options
+{
+	my $self = shift;
+	my $long = $self->state_long();
+	return(
+		["$long Driver's License Number", 'l', 'text', 17],
+	);
+}
+
+sub process
+{
+	my($self) = shift;
+	my(%params) = @_;
+	my($lic) = $params{'l'};
+	my(%error_fields, $error_explain, $output);
+
+	my $state_name = $self->state_long();
+	my $number_re = $self->number_regex();
+	my $number_sample = $self->number_sample();
+	
+
+	my($last, $first_middle, $year_ten, $year_one, $day_month, $count) =
+		($lic =~ /$number_re/);
+	if(not defined $day_month) {
+		$error_fields{'l'} .=
+		"Please specify a $state_name Driver's License number. It will look ".
+		"like \"$number_sample\".";
+	}
+
+	if((defined $error_explain and length $error_explain) or
+		scalar keys %error_fields){
+		return(\%error_fields, $error_explain, $output);
+	}
+
+	my($gender) = $self->gender($day_month);
+	my($first_name) = $self->first_name($first_middle, $gender);
+	my($middle_init) = $self->middle_init($first_middle).'.';
+	my($last_name_sound) = main::describe_soundex($last);
+	my($last_name_sound_guess) = main::soundex_sound_guess($last);
+	my(@similar_last_names) = main::soundex_similar_last_names($last);
+	my($similar_last_names) = join(', ', @similar_last_names);
+	my($month) = $self->month_name($day_month);
+	my($day) = $self->day($day_month);
+	my($year) = $year_ten.$year_one;
+
+	# Some time around 2016 this will start to be more wrong than it is
+	# right for "00".
+	my $year_thousands_guess = '19';
+
+	$output =
+		main::format_key_value('First Name', $first_name).
+		main::format_key_value('Middle Initial', $middle_init).
+		main::format_key_value('Last Name', $last_name_sound.
+		" Perhaps it sounds like \"$last_name_sound_guess\"").
+		main::format_key_value('Last Name Guesses', $similar_last_names).
+		main::format_key_value('Gender', $gender).
+		main::format_key_value('Date of Birth', "$month $day, '$year").
+		main::format_key_value('Wild Guess', "$first_name $middle_init ".
+			"$similar_last_names[0], $gender, born $month $day, ".
+			"$year_thousands_guess$year").
+		'';
+
+	return(\%error_fields, $error_explain, $output);
+}
+
+sub day {
+	my $self = shift;
+	my($input) = @_;
+	$input %= $self->female_add();
+	return($input % $self->month_mult());
+}
+
+sub month_num {
+	my $self = shift;
+	my($input) = @_;
+	$input %= $self->female_add();
+	return(($input - $self->day($input)) / $self->month_mult() + 1);
+}
+
+sub month_name {
+	my $self = shift;
+	my($input) = @_;
+	my(@MONTHS) = ( 'January', 'February', 'March', 'April', 'May', 'June',
+		'July', 'August', 'September', 'October', 'November', 'December' );
+	my $num = $self->month_num($input);
+	if($num < 1 or $num > 12) {
+		return "BADMONTH";
+	}
+	return @MONTHS[$self->month_num($input)-1];
+}
+
+sub gender {
+	my $self = shift;
+	my($input) = @_;
+	if($input >= 500) { return 'female'; }
+	return 'male';
+}
+
+sub middle_init
+{
+	my $self = shift;
+	my($input) = @_;
+	return main::dlfirstmiddle_middle_from_code($input);
+}
+
+
+sub first_name
+{
+	my $self = shift;
+	my($Input, $Gender) = @_;
+	return main::dlfirstmiddle_first_from_code($Input, $Gender);
+}
+
+
+
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+
+
+package UniqueID::DriversLicense::Wisconsin;
+@UniqueID::DriversLicense::Wisconsin::ISA = ( "UniqueID::DriversLicense::USShared" );
+
+
+sub new {
+	my $class = shift;
+	$class = ref($class) if ref($class);
+
+	bless my $self = {}, $class;
+
+	return $self;
+}
+
+sub state_long { 'Wisconsin' }
+sub state_short { 'wi' }
+sub female_add { 500 }
+sub month_mult { 40 }
+sub format_license {
+	my $self = shift;
+	my($last_soundex, $first_middle_code,
+		$year_tens, $year_ones, $month_day_gender_code) = @_;
+	return $last_soundex.'-'.
+		$first_middle_code. $year_tens.'-'.$year_ones.
+		$month_day_gender_code.'-??';
+}
+sub result_notes {
+	"The last two digits cannot be determined.  They represent the ".
+	"number of people who have the exact same license number as you ".
+	"(excepting the last two digits) when you got your license." }
+
+
+
+
+
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+
+
+package UniqueID::DriversLicense::WisconsinReverse;
+
+@UniqueID::DriversLicense::WisconsinReverse::ISA = ( "UniqueID::DriversLicense::USSharedReverse" );
+
+sub new {
+	my $class = shift;
+	$class = ref($class) if ref($class);
+
+	bless my $self = {}, $class;
+
+	return $self;
+}
+
+sub state_long { 'Wisconsin' }
+sub state_short { 'wi' }
+sub number_regex { q/([A-Za-z]\d\d\d)-(\d\d\d)(\d)-(\d)(\d\d\d)-(..)/ }
+sub number_sample { "S530-4615-0244-03" }
+sub female_add { 500 }
+sub month_mult { 40 }
+sub describe {
+	my($link) = main::path_to_script();
+	return <<_EODESC;
+Given a Wisconsin Driver's License number, determine its owner's
+identity.
+<A HREF="http://www.highprogrammer.com/alan/numbers/dl_us_shared.html">How it works</A>.
+<A HREF="$link/dl_wi">Create a fictional number to test</A>.
+_EODESC
+#'
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+
+
+package UniqueID::DriversLicense::Illinois;
+@UniqueID::DriversLicense::Illinois::ISA = ( "UniqueID::DriversLicense::USShared" );
+
+
+sub new {
+	my $class = shift;
+	$class = ref($class) if ref($class);
+
+	bless my $self = {}, $class;
+
+	return $self;
+}
+
+sub state_long { 'Illinois' }
+sub state_short { 'il' }
+sub female_add { 600 }
+sub month_mult { 31 }
+sub format_license {
+	my $self = shift;
+	my($last_soundex, $first_middle_code,
+		$year_tens, $year_ones, $month_day_gender_code) = @_;
+	return $last_soundex.'-'.
+		$first_middle_code. $year_tens.'-'.$year_ones.
+		$month_day_gender_code;
+}
+sub result_notes { "" }
+sub describe_more { main::html_betaware(); }
+
+
+
+
+
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+
+package UniqueID::DriversLicense::IllinoisReverse;
+
+@UniqueID::DriversLicense::IllinoisReverse::ISA = ( "UniqueID::DriversLicense::USSharedReverse" );
+
+sub new {
+	my $class = shift;
+	$class = ref($class) if ref($class);
+
+	bless my $self = {}, $class;
+
+	return $self;
+}
+
+sub state_long { 'Illinois' }
+sub state_short { 'il' }
+sub number_regex { q/([A-Za-z]\d\d\d)-(\d\d\d)(\d)-(\d)(\d\d\d)/ }
+sub number_sample { "S530-4615-0244" }
+sub female_add { 600 }
+sub month_mult { 31 }
+sub describe {
+	my($link) = main::path_to_script();
+	my $status = main::html_betaware();
+	return <<_EODESC;
+Given an Illinois Driver's License number, determine its owner's
+identity.
+$status
+<A HREF="http://www.highprogrammer.com/alan/numbers/dl_us_shared.html">How it works</A>.
+<A HREF="$link/dl_il">Create a fictional number to test</A>.
+_EODESC
+#'
+}
+
+
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+
+
+package UniqueID::DriversLicense::Florida;
+@UniqueID::DriversLicense::Florida::ISA = ( "UniqueID::DriversLicense::USShared" );
+
+
+sub new {
+	my $class = shift;
+	$class = ref($class) if ref($class);
+
+	bless my $self = {}, $class;
+
+	return $self;
+}
+
+sub state_long { 'Florida' }
+sub state_short { 'fl' }
+sub female_add { 500 }
+sub month_mult { 40 }
+sub format_license {
+	my $self = shift;
+	my($last_soundex, $first_middle_code,
+		$year_tens, $year_ones, $month_day_gender_code) = @_;
+	return $last_soundex.'-'.
+		$first_middle_code. '-'. $year_tens.$year_ones. '-'.
+		$month_day_gender_code;
+}
+sub result_notes { "" }
+sub describe_more { main::html_betaware(); }
+
+
+
+
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+
+package UniqueID::DriversLicense::FloridaReverse;
+
+@UniqueID::DriversLicense::FloridaReverse::ISA = ( "UniqueID::DriversLicense::USSharedReverse" );
+
+sub new {
+	my $class = shift;
+	$class = ref($class) if ref($class);
+
+	bless my $self = {}, $class;
+
+	return $self;
+}
+
+sub state_long { 'Florida' }
+sub state_short { 'fl' }
+sub number_regex { q/([A-Za-z]\d\d\d)-(\d\d\d)-(\d)(\d)-(\d\d\d)/ }
+sub number_sample { "S530-461-50-244" }
+sub female_add { 500 }
+sub month_mult { 40 }
+sub describe {
+	my($link) = main::path_to_script();
+	my $status = main::html_betaware();
+	return <<_EODESC;
+Given a Florida Driver's License number, determine its owner's
+identity.
+$status
+<A HREF="http://www.highprogrammer.com/alan/numbers/dl_us_shared.html">How it works</A>.
+<A HREF="$link/dl_fl">Create a fictional number to test</A>.
+_EODESC
+#'
+}
+
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+
+
+package UniqueID::DriversLicense::Washington;
+@UniqueID::DriversLicense::Washington::ISA = ( "UniqueID::DriversLicense::USShared" );
+
+
+sub new {
+	my $class = shift;
+	$class = ref($class) if ref($class);
+
+	bless my $self = {}, $class;
+
+	return $self;
+}
+
+sub state_long { 'Washington' }
+sub state_short { 'wa' }
+sub result_notes {
+	my $link= main::email_link('Let me know');
+	return <<ENDIT
+<p>Two answers are returned because there are two options for the second
+to last character.  The first answer is probably correct, but if someone
+else already got that number when you applied, you'll have the second
+answer.
+
+<p>This is a preliminary work.
+$link if you find any problems.
+
+ENDIT
+}
+sub describe_more { 
+	return main::html_alphaware().
+		"<p><A HREF=\"http://www.highprogrammer.com/alan/numbers/dl_us_wa.html\">How this works</A>.\n";
+	}
+
+sub need_last_name { return 1; }
+sub need_first_name { return 1; }
+sub need_middle_initial { return 1; }
+sub need_gender { return 0; }
+sub need_dob_year { return 1; }
+sub need_dob_month { return 1; }
+sub need_dob_day { return 1; }
+
+sub toupper {
+		return "\U@_";
+}
+
+# http://www.academic.marist.edu/mwa/wsdln.htm
+#
+# LLLLLFMYYXmd
+# LLLLL - First five letters of last name, padded with * if necessary
+# F - First initial
+# M - Middle initial, * if not avail
+# YY - 100 - two digit year of birth (probably 00 for 1900 or 2000)
+# X - Check digit
+# m - Encoded birth month (Two options!)
+# d - Encoded birth day
+
+# Known values:
+# 26 Feb, C6
+# 27 May, K7
+# 18 Jun, LQ
+
+sub letter_to_digit {
+	my $self = shift;
+	my($c)= @_;
+	my(%CHARS) = (
+		0=>0,
+		1=>1,
+		2=>2,
+		3=>3,
+		4=>4,
+		5=>5,
+		6=>6,
+		7=>7,
+		8=>8,
+		9=>9,
+		#'*'=>0, # marist.edu site claims this
+		'*'=>4,  # This appears correct (from email)
+		'A'=>1,
+		'B'=>2,
+		'C'=>3,
+		'D'=>4,
+		'E'=>5,
+		'F'=>6,
+		'G'=>7,
+		'H'=>8,
+		'I'=>9,
+		'J'=>1,
+		'K'=>2,
+		'L'=>3,
+		'M'=>4,
+		'N'=>5,
+		'O'=>6,
+		'P'=>7,
+		'Q'=>8,
+		'R'=>9,
+		'S'=>2,
+		'T'=>3,
+		'U'=>4,
+		'V'=>5,
+		'W'=>6,
+		'X'=>7,
+		'Y'=>8,
+		'Z'=>9,
+	);
+	if(not exists $CHARS{$c}) {
+		return 0;
+	}
+	return $CHARS{$c};
+}
+
+sub add_checksum {
+	my $self = shift;
+	my($val) = @_;
+	my(@a) = (undef, split(//, $val));
+	my(@orig) = @a;
+	foreach my $c (@a) {
+		$c = $self->letter_to_digit($c);
+	}
+	$orig[10] = ($a[1] - $a[2] + $a[3] - $a[4] + $a[5] - $a[6] + $a[7] - $a[8] + $a[9] - $a[11] + $a[12]) % 10;
+	return join '', @orig;
+
+}
+
+sub encode_day {
+	my $self = shift;
+	my ($day) = @_;
+	my(@DAY_CODE) = qw(
+		BOGUS    
+		A B C D E
+		F G H Z S
+		J K L M N
+		W P Q R 0
+		1 2 3 4 5
+		6 7 8 9 T
+		U
+	);
+	return($DAY_CODE[$day]);
+}
+
+sub encode_month {
+	my $self = shift;
+	# Returns two options, the second will be used if the first
+	# is already assigned.
+	my ($month) = @_;
+	if($month > 12 or $month < 1) {
+		return (undef, undef);
+	}
+	my(@MONTH_CODES) = (
+		undef, # dummy 0
+		[qw(B S)], # Jan  1
+		[qw(C T)], # Feb  2
+		[qw(D U)], # Mar  3
+		[qw(J 1)], # Apr  4
+		[qw(K 2)], # May  5
+		[qw(L 3)], # Jun  6
+		[qw(M 4)], # Jul  7
+		[qw(N 5)], # Aug  8
+		[qw(O 6)], # Sep  9
+		[qw(P 7)], # Oct 10
+		[qw(Q 8)], # Nov 11
+		[qw(R 9)], # Dec 12
+		);
+	return(@{$MONTH_CODES[$month]});
+}
+
+sub encode_drivers_license {
+	my $self = shift;
+	my($last, $first, $middle, $gender, $yy, $mm, $dd) = @_;
+	$last = toupper(substr $last."****", 0, 5);
+	if(not defined $middle or length $middle < 1) {
+		$middle = '*';
+	}
+	$middle = toupper(substr $middle, 0, 1);
+	$first = toupper(substr $first, 0, 1);
+	my $yearcal = 100 - $yy;
+	if($yearcal == 100) { $yearcal = 0; }
+	$yy = sprintf("%02d",$yearcal);
+	my($m1, $m2) = $self->encode_month($mm);
+	my $d = $self->encode_day($dd);
+	my $prefix = "$last$first$middle$yy";
+	my $guess1 = "$prefix?$m1$d";
+	my $guess2 = "$prefix?$m2$d";
+		# Possible minor optimization,
+		# I believe that the m1 and m2 are equivalent for the checksum,
+		# so we can calculate it once for guess1 and insert it into guess2.
+	$guess1 = $self->add_checksum($guess1);
+	$guess2 = $self->add_checksum($guess2);
+	return "$guess1 or $guess2";
+}
+
+sub describe {
+	my $self = shift;
+	my($link) = main::path_to_script();
+	my $state = $self->state_long();
+	my $state_short = $self->state_short();
+	my $state_short_r = $state_short.'r';
+	my $describe_more = $self->describe_more();
+#<A HREF="http://www.highprogrammer.com/alan/numbers/dl_us_shared.html">How it works</A>.
+#<A HREF="$link/dl_$state_short_r">Reverse analyze an existing number</A>.
+	return <<_EODESC;
+Calculate your $state Driver's License number from your
+information.
+$describe_more
+_EODESC
+}
+
+
+
+
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+
+
+package UniqueID::DriversLicense::NewYork1992;
+@UniqueID::DriversLicense::NewYork1992::ISA = ( "UniqueID::DriversLicense::USShared" );
+
+
+sub new {
+	my $class = shift;
+	$class = ref($class) if ref($class);
+
+	bless my $self = {}, $class;
+
+	return $self;
+}
+
+sub state_long { 'New York (pre 1992)' }
+sub state_short { 'ny92' }
+sub result_notes { 
+	return <<ENDIT
+The question mark indicates an overflow digit.  There might not be
+anything there, but if you have the otherwise exact same number as someone
+else that digit will be used to distinguish between you.
+
+ENDIT
+}
+sub describe_more { 
+	return main::html_alphaware().
+		"<p><STRONG>This algorithm is known to not work!</strong></p>".
+		"<p>This algorithm only works for license numbers prior to September 1992.</p>".
+		"<p><A HREF=\"http://www.highprogrammer.com/alan/numbers/dl_us_ny92.html\">How this works</A>.</p>\n";
+	}
+
+sub need_last_name { return 1; }
+sub need_first_name { return 1; }
+sub need_middle_initial { return 1; }
+sub need_gender { return 1; }
+sub need_dob_year { return 1; }
+sub need_dob_month { return 1; }
+sub need_dob_day { return 1; }
+
+
+sub letter_to_num {
+	local($_) = @_;
+	if(not defined $_) { return 0; }
+	my $ord = ord(uc($_));
+	if($ord > ord('Z') || $ord < ord('A')) {
+		return 0;
+	}
+	return $ord - ord('A') + 1;
+}
+
+# http://www.cis.famu.edu/~riggs/CProg/Prog2Sp02.html
+# 
+# First Name: Alvy
+# Middle Initial: J
+# Last Name: Singer
+# Gender: M
+# Date of Birth: 
+#    Year: 1935
+#    Month: 1
+#    Day: 13
+# S09507457182808935
+
+# Enter your last name: singer
+# Enter your first name: alvy
+# Enter your middle initial: j
+# Your birth year: 1935
+# Your birth month: 1
+# Your birth day: 13
+# Your sex (0 - male, 1-female): 0
+# Your license number is : S09507457182808935
+# 
+# Julia Ho Oct 2, 1950
+# H14989504785463550
+#             ^- Unsure, probably right.
+
+sub encode_drivers_license {
+	my $self = shift;
+	my($last, $first, $middle, $gender, $yy, $mm, $dd) = @_;
+	my($l1, $l2, $l3, $l4, $l5) = split //, $last;
+	my $m1 = substr $middle, 0, 1;
+	my($f1, $f2, $f3) = split //, $first;
+
+	$l1 = uc($l1);
+
+	$l2 = letter_to_num($l2);
+	$l3 = letter_to_num($l3);
+	$l4 = letter_to_num($l4);
+	$l5 = letter_to_num($l5);
+	$m1 = letter_to_num($m1);
+	$f1 = letter_to_num($f1);
+	$f2 = letter_to_num($f2);
+	$f3 = letter_to_num($f3);
+
+	my $x = 385_829_132;
+	if(length $last == 3) {
+		$x = 385_318_778;
+	} elsif(length $last < 3) {
+		$x = 371_539_194;
+	}
+	my $namenum = sprintf "%012.0f",
+		10_017_758_323 * $l2
+		+ 371_538_441 * $l3
+		+ 13_779_585 * $l4
+		+ 510_355 * $l5
+		+ 19_657 * $f1
+		+ 729 * $f2
+		+ 27 * $f3
+		+ $m1
+		- $x;
+
+	my $dobnum = sprintf "%03d", 63 * $mm + 2 * $dd;
+	if($gender eq 'F') { $dobnum++; }
+	if(length $yy != 2) { $yy = substr $yy, 2, 2; }
+
+	return "$l1$namenum$dobnum?$yy";
+}
+
+sub describe {
+	my $self = shift;
+	my($link) = main::path_to_script();
+	my $state = $self->state_long();
+	my $state_short = $self->state_short();
+	my $state_short_r = $state_short.'r';
+	my $describe_more = $self->describe_more();
+#<A HREF="http://www.highprogrammer.com/alan/numbers/dl_us_shared.html">How it works</A>.
+#<A HREF="$link/dl_$state_short_r">Reverse analyze an existing number</A>.
+	return <<_EODESC;
+Calculate your $state Driver's License number from your
+information.
+$describe_more
+_EODESC
+}
+
+
+
+
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+
+
+package UniqueID::DriversLicense::NewHampshire;
+@UniqueID::DriversLicense::NewHampshire::ISA = ( "UniqueID::DriversLicense::USShared" );
+
+# Thanks to "RGM" who sent me a description of New Hampshire's system.
+
+
+sub new {
+	my $class = shift;
+	$class = ref($class) if ref($class);
+
+	bless my $self = {}, $class;
+
+	return $self;
+}
+
+sub state_long { 'New Hampshire' }
+sub state_short { 'nh' }
+sub result_notes { 
+	my $link= main::email_link('Let me know');
+	return <<ENDIT
+The last digit cannot be determined.  It represents the
+number of people who have the exact same license number as you
+(excepting the last digit) when you got your license.
+
+<p>This is a preliminary work.
+$link if you find any problems.
+
+ENDIT
+}
+sub describe_more { main::html_alphaware() }
+
+#sub need_last_name { return 1; }
+#sub need_first_name { return 1; }
+sub need_middle_initial { return 0; }
+sub need_gender { return 0; }
+#sub need_dob_year { return 1; }
+#sub need_dob_month { return 1; }
+#sub need_dob_day { return 1; }
+
+sub toupper {
+		return "\U@_";
+}
+
+sub encode_drivers_license {
+	my $self = shift;
+	my($last, $first, $middle, $gender, $yy, $mm, $dd) = @_;
+	my $lastfirst = toupper(substr $last, 0, 1);
+	my $lastlast = toupper(substr $last, -1);
+	$first = toupper(substr $first, 0, 1);
+	return sprintf("%02d%s%s%s%02d%02d?",
+		$mm, $lastfirst, $lastlast, $first, $yy, $dd);
+}
+
+sub describe {
+	my $self = shift;
+	my($link) = main::path_to_script();
+	my $state = $self->state_long();
+	my $state_short = $self->state_short();
+	my $state_short_r = $state_short.'r';
+	my $describe_more = $self->describe_more();
+#<A HREF="http://www.highprogrammer.com/alan/numbers/dl_us_shared.html">How it works</A>.
+#<A HREF="$link/dl_$state_short_r">Reverse analyze an existing number</A>.
+	return <<_EODESC;
+Calculate your $state Driver's License number from your
+information.
+$describe_more
+_EODESC
+}
+
+
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+
+
+# Shared algorithm for MD, MI, and MN
+package UniqueID::DriversLicense::USSharedMDMIMN;
+@UniqueID::DriversLicense::USSharedMDMIMN::ISA = ( "UniqueID::DriversLicense::USShared" );
+
+# Thanks to Joseph Gallian http://www.d.umn.edu/~jgallian/
+
+# Open issue: Minnesota does not encode year of birth.  Do MD or MI?
+
+# Known good data:
+# (From an example)
+# Last Name: Smith
+# First Name: John
+# Middle Name: Bennett
+# Date of Birth: 
+#   Month: 02
+#   Day: 27
+# Driver's License Number: S530-429-085-151
+
+
+
+sub new {
+	my $class = shift;
+	$class = ref($class) if ref($class);
+
+	bless my $self = {}, $class;
+
+	return $self;
+}
+
+sub result_notes { 
+	my $link= main::email_link('Let me know');
+# TODO: Instead of just complaining about it, offer
+# a few results in order of likelyhood.
+	return <<ENDIT
+The last group of three digits might vary slightly.
+If the number you would have been assigned has
+already been assigned, they will add or subtract from
+that last group of numbers to achieve a unique license number.
+<a href="http://www.highprogrammer.com/alan/numbers/dl_us_shared_mmm.html">How this works</a>.
+
+<p>This is a preliminary work.
+$link if you find any problems.
+
+ENDIT
+}
+sub describe_more { main::html_alphaware() }
+
+#sub need_last_name { return 1; }
+#sub need_first_name { return 1; }
+sub need_middle_initial { return 0; }
+sub need_middle_name { return 1; }
+sub need_gender { return 0; }
+sub need_dob_year { return 0; }
+#sub need_dob_month { return 1; }
+#sub need_dob_day { return 1; }
+
+
+sub encode_drivers_license {
+	my $self = shift;
+	my($last, $first, $middle, $gender, $yy, $mm, $dd) = @_;
+
+	my($q1) = main::soundex($last),
+	my($q2, $q3) = encode_first_middle($first, $middle);
+	my($q4) = encode_month_day($mm, $dd);
+	return "$q1-$q2-$q3-$q4";
+}
+
+sub describe {
+	my $self = shift;
+	my($link) = main::path_to_script();
+	my $state = $self->state_long();
+	my $state_short = $self->state_short();
+	my $state_short_r = $state_short.'r';
+	my $describe_more = $self->describe_more();
+#<A HREF="http://www.highprogrammer.com/alan/numbers/dl_us_shared.html">How it works</A>.
+#<A HREF="$link/dl_$state_short_r">Reverse analyze an existing number</A>.
+	return <<_EODESC;
+Calculate your $state Driver's License number from your
+information.
+$describe_more
+_EODESC
+}
+
+
+{
+my %table;
+# TODO: Return list of options:
+# If the license number collides, the person is assigned the next largest
+# date number that is _not_ taken by the next date.  If those run out,
+# take go downward instead.  No idea what happens if you hit the previous
+# date's number.
+sub encode_month_day {
+	my($mm, $dd) = @_;
+	if(not exists $table{'01-01'}) {
+		%table = build_month_day_table();
+	}
+	my $key = sprintf "%02d-%02d", $mm, $dd;
+	if(exists $table{$key}) {
+		return $table{$key};
+	}
+	return '???';
+}
+}
+
+sub validate_month_day_table {
+	my(%table) = @_;
+	my $previous = 0;
+	foreach my $month (1..12) {
+		foreach my $day (1..31) {
+			my $key = sprintf "%02d-%02d", $month, $day;
+			last if not exists $table{$key};
+			if(($previous + 1) >= $table{$key} ) {
+				die "$key is $table{$key} (previous is $previous)";
+			}
+		}
+	}
+	my(@dates) = sort keys %table;
+	if(@dates != 366) {
+		die "Not enough dates";
+	}
+	if($dates[0] ne '01-01') {
+		die "First date is $dates[0], not 01-01";
+	}
+	if($dates[365] ne '12-31') {
+		die "Last date is $dates[365], not 12-31";
+	}
+}
+
+sub build_month_day_table {
+	# Bow before The Chart of DOOOOOM!
+	# This table fills me with sadness.  TODO: Find an algorithm to generate.
+	# The pattern is _soooo_ close to being simple... grrr.
+	return (
+		# January 001
+	    '01-01' => '002',
+	'01-02' => '007', '01-03' => '010', '01-04' => '012',
+	'01-05' => '017', '01-06' => '020', '01-07' => '022', '01-08' => '025',
+	'01-09' => '027', '01-10' => '030', '01-11' => '032', '01-12' => '035',
+	'01-13' => '037', '01-14' => '040', '01-15' => '042', '01-16' => '045',
+	'01-17' => '047', '01-18' => '050', '01-19' => '052', '01-20' => '055',
+	'01-21' => '057', '01-22' => '060', '01-23' => '062', '01-24' => '065',
+	'01-25' => '067', '01-26' => '070', '01-27' => '072', '01-28' => '075',
+	'01-29' => '077', '01-30' => '080', '01-31' => '082', # Next      085
+		# February 085
+	'02-01' => '086', '02-02' => '088', '02-03' => '091', '02-04' => '093',
+	'02-05' => '096', '02-06' => '098', '02-07' => '101', '02-08' => '103',
+	'02-09' => '106', '02-10' => '108', '02-11' => '111', '02-12' => '113',
+	'02-13' => '116', '02-14' => '118', '02-15' => '121', '02-16' => '123',
+	'02-17' => '126', '02-18' => '128', '02-19' => '131', '02-20' => '133',
+	'02-21' => '136', '02-22' => '138', '02-23' => '141', '02-24' => '143',
+	'02-25' => '146', '02-26' => '148', '02-27' => '151', '02-28' => '153',
+	'02-29' => '156', # Next      158
+		# March 158
+	'03-01' => '159', '03-02' => '162', '03-03' => '164', '03-04' => '167',
+	'03-05' => '169', '03-06' => '172', '03-07' => '174', '03-08' => '177',
+	                  '03-09' => '182', '03-10' => '184', '03-11' => '187',
+	'03-12' => '189', '03-13' => '192', '03-14' => '194', '03-15' => '197',
+	'03-16' => '199', '03-17' => '202', '03-18' => '204', '03-19' => '207',
+	                                                      '03-20' => '227',
+	'03-21' => '229', '03-22' => '232', '03-23' => '234', '03-24' => '237',
+	'03-25' => '239', '03-26' => '242', '03-27' => '244', '03-28' => '247',
+	'03-29' => '249', '03-30' => '252', '03-31' => '254', # Next      257
+		# April 257
+	'04-01' => '258', '04-02' => '260', '04-03' => '263', '04-04' => '265',
+	'04-05' => '268', '04-06' => '270', '04-07' => '273', '04-08' => '275',
+	'04-09' => '278', '04-10' => '280', '04-11' => '283', '04-12' => '285',
+	'04-13' => '288', '04-14' => '290', '04-15' => '293', '04-16' => '295',
+	'04-17' => '298', '04-18' => '300', '04-19' => '303', '04-20' => '305',
+	'04-21' => '308', '04-22' => '310', '04-23' => '313', '04-24' => '315',
+	'04-25' => '318', '04-26' => '320', '04-27' => '323', '04-28' => '325',
+	'04-29' => '328', '04-30' => '330', # Next      333
+		# May 333
+	'05-01' => '334', '05-02' => '336', '05-03' => '339', '05-04' => '341',
+	'05-05' => '344', '05-06' => '346', '05-07' => '349', '05-08' => '351',
+	'05-09' => '354', '05-10' => '356', '05-11' => '359', '05-12' => '361',
+	'05-13' => '364', '05-14' => '366', '05-15' => '369', '05-16' => '371',
+	'05-17' => '374', '05-18' => '376', '05-19' => '379', '05-20' => '381',
+	'05-21' => '384', '05-22' => '386', '05-23' => '389', '05-24' => '391',
+	'05-25' => '394', '05-26' => '396', '05-27' => '399', '05-28' => '401',
+	'05-29' => '404', '05-30' => '406', '05-31' => '409', # Next      411
+		# June 411
+	'06-01' => '412', '06-02' => '415', '06-03' => '417', '06-04' => '420',
+	'06-05' => '422', '06-06' => '425', '06-07' => '427', '06-08' => '430',
+	'06-09' => '432', '06-10' => '435', '06-11' => '437', '06-12' => '440',
+	'06-13' => '442', '06-14' => '445', '06-15' => '447', '06-16' => '450',
+	'06-17' => '452',                   '06-18' => '467', '06-19' => '470',
+	'06-20' => '472', '06-21' => '475', '06-22' => '477', '06-23' => '480',
+	'06-24' => '482',                   '06-25' => '497', '06-26' => '500',
+	'06-27' => '502', '06-28' => '505', '06-29' => '507',
+	                                    '06-30' => '517', # Next      530
+		# July 520
+	  '07-01' => '521',
+	    '07-02' => '523',
+	      '07-03' => '526',
+	        '07-04' => '528',
+	'07-05' => '534', '07-06' => '537', '07-07' => '539', '07-08' => '542',
+	'07-09' => '544', '07-10' => '547', '07-11' => '549', '07-12' => '552',
+	'07-13' => '554', '07-14' => '557', '07-15' => '559', '07-16' => '562',
+	'07-17' => '564', '07-18' => '567', '07-19' => '569', '07-20' => '572',
+	'07-21' => '574', '07-22' => '577', '07-23' => '579', '07-24' => '582',
+	'07-25' => '584', '07-26' => '587', '07-27' => '589', '07-28' => '592',
+	'07-29' => '594', '07-30' => '597', '07-31' => '599', # Next      602
+		# August 602
+	                  '08-01' => '603', '08-02' => '605', '08-03' => '508',
+	'08-04' => '610', '08-05' => '613', '08-06' => '615', '08-07' => '618',
+	'08-08' => '620', '08-09' => '623', '08-10' => '625', '08-11' => '628',
+	'08-12' => '630', '08-13' => '633', '08-14' => '635', '08-15' => '638',
+	'08-16' => '640', '08-17' => '643', '08-18' => '645', '08-19' => '648',
+	'08-20' => '650', '08-21' => '653', '08-22' => '655', '08-23' => '658',
+	'08-24' => '660', '08-25' => '663', '08-26' => '665', '08-27' => '668',
+	'08-28' => '670', '08-29' => '673', '08-30' => '675', '08-31' => '678',
+    # Next      680
+		# September 680
+	'09-01' => '681', '09-02' => '684', '09-03' => '686', '09-04' => '689',
+	'09-05' => '691', '09-06' => '694', '09-07' => '696', '09-08' => '699',
+	'09-09' => '701', '09-10' => '704', '09-11' => '706', '09-12' => '709',
+	'09-13' => '711', '09-14' => '714', '09-15' => '716', '09-16' => '719',
+	'09-17' => '721', '09-18' => '724', '09-19' => '726', '09-20' => '729',
+	'09-21' => '731', '09-22' => '734', '09-23' => '736', '09-24' => '739',
+	'09-25' => '741', '09-26' => '744', '09-27' => '746', '09-28' => '749',
+	'09-29' => '751', '09-30' => '754', # Next      756
+		# October 756
+	'10-01' => '757', '10-02' => '760', '10-03' => '762', '10-04' => '765',
+	'10-05' => '767', '10-06' => '770', '10-07' => '772', '10-08' => '775',
+	'10-09' => '777', '10-10' => '780', '10-11' => '782', '10-12' => '785',
+	'10-13' => '787', '10-14' => '790', '10-15' => '792',
+	'10-16' => '797', '10-17' => '800', '10-18' => '802',
+	'10-19' => '807', '10-20' => '810', '10-21' => '812', '10-22' => '815',
+	'10-23' => '817', '10-24' => '820', '10-25' => '822', '10-26' => '825',
+	'10-27' => '827', '10-28' => '830', '10-29' => '832', '10-30' => '835',
+	'10-31' => '837', # Next      840
+		# November 840
+	'11-01' => '841', '11-02' => '843', '11-03' => '846', '11-04' => '848',
+	'11-05' => '851', '11-06' => '853', '11-07' => '856', '11-08' => '858',
+	'11-09' => '861', '11-10' => '863', '11-11' => '866', '11-12' => '868',
+	'11-13' => '871', '11-14' => '873', '11-15' => '876', '11-16' => '878',
+	'11-17' => '881', '11-18' => '883', '11-19' => '886', '11-20' => '888',
+	'11-21' => '891', '11-22' => '893', '11-23' => '896', '11-24' => '898',
+	'11-25' => '901', '11-26' => '903', '11-27' => '906', '11-28' => '908',
+	'11-29' => '911', '11-30' => '913', # Next      916
+		# December 916
+	'12-01' => '917', '12-02' => '919', '12-03' => '922', '12-04' => '924',
+	'12-05' => '927', '12-06' => '929', '12-07' => '932', '12-08' => '934',
+	'12-09' => '937', '12-10' => '939', '12-11' => '942', '12-12' => '944',
+	'12-13' => '947', '12-14' => '949', '12-15' => '952', '12-16' => '954',
+	'12-17' => '957', '12-18' => '959', '12-19' => '962', '12-20' => '964',
+	'12-21' => '967', '12-22' => '969', '12-23' => '972', '12-24' => '974',
+	'12-25' => '977',
+	    '12-26' => '983', '12-27' => '985',
+	          '12-28' => '990',
+	    '12-29' => '993', '12-30' => '995',
+	       '12-31' => '998',
+	);
+}
+
+sub encode_first_middle {
+	my($first, $middle) = @_;
+	$first =~ tr[A-Z][a-z];
+	$middle =~ tr[A-Z][a-z];
+	my($first_encoded, $first_next) = encode_name($first);
+	my($middle_encoded);
+	if(defined $middle and length $middle) {
+		($middle_encoded) = encode_name($middle);
+	} else {
+		my(%table) = (
+			'a'=>'001', 'b'=>'002', 'c'=>'003', 'd'=>'004', 'e'=>'005', 
+			'f'=>'006', 'g'=>'007', 'h'=>'008', 'i'=>'009', 'j'=>'010',
+			'k'=>'011', 'l'=>'012', 'm'=>'013', 'n'=>'014', 'o'=>'015',
+			'p'=>'016', 'q'=>'017', 'r'=>'018', 's'=>'019', 't'=>'020',
+			'u'=>'021', 'v'=>'022', 'w'=>'023', 'x'=>'024', 'y'=>'025',
+			'z'=>'026',
+		);
+		if(not defined $first_next or not length $first_next) {
+			$middle_encoded = '000';
+		} elsif(exists $table{$first_next}) {
+			$middle_encoded = $table{$first_next};
+		} else {
+			$middle_encoded = '???';
+		}
+	}
+	return($first_encoded, $middle_encoded);
+}
+
+{
+my %table;
+sub encode_name {
+	my($name) = @_;
+	if(not exists $table{'a'}) {
+		%table = build_name_encoding_table();
+	}
+	if(exists $table{$name}) {
+		return($table{$name}, '');
+	}
+	my $next = substr $name, 3, 1;
+	$name = substr $name, 0, 3;
+	if(exists $table{$name}) {
+		return($table{$name}, $next);
+	}
+	$next = substr $name, 2, 1;
+	$name = substr $name, 0, 2;
+	if(exists $table{$name}) {
+		return($table{$name}, $next);
+	}
+	return ('???', undef);
+}
+}
+
+sub dump_name_encoding_table {
+	my(%table) = @_;
+	foreach my $key (sort keys %table) {
+		print "$key -> $table{$key}\n";
+	}
+}
+
+sub validate_name_encoding_table {
+	my(%table) = @_;
+	my %numbers;
+	foreach my $name (keys %table) {
+		my $num = $table{$name};
+		if(exists $numbers{$num}) {
+			die "$num used for $numbers{$num} and $name}";
+		}
+		$numbers{$num} = $name;
+	}
+	my(@nums) = sort keys %numbers;
+	if(@nums != (999-26)) {
+		die "Not enough entries in table";
+	}
+	if($nums[0] != 27) {
+		die "Table doesn't start with 27";
+	}
+	if($nums[$#nums] != 999) {
+		die "Table doesn't end with 999";
+	}
+	sub check {
+		my($table, $letter, $value) = @_;
+		if($table->{$letter} != $value) {
+			die "$letter doesn't map to $value";
+		}
+	}
+	check(\%table, 'a', 27);
+	check(\%table, 'dn', 148);
+	check(\%table, 'edn', 179);
+	check(\%table, 'elv', 224);
+	check(\%table, 'h', 297);
+	check(\%table, 'jad', 357);
+	check(\%table, 'jom', 434);
+	check(\%table, 'mav', 591);
+	check(\%table, 'ml', 606);
+	check(\%table, 'nz', 647);
+	check(\%table, 'margaret', 586);
+	check(\%table, 'qb', 704);
+	check(\%table, 'sq', 774);
+	check(\%table, 'vk', 849);
+	check(\%table, 'william', 887);
+	check(\%table, 'zm', 986);
+	return 1;
+}
+
+
+sub build_name_encoding_table {
+	sub simple_range {
+		my($table, $letter, $start, $stop) = @_;
+		add_map($table, $letter, $start);
+		fill($table, $letter.'a', $letter.'z', $start+1, $stop);
+	}
+	sub fill {
+		my($table, $l1, $l2, $n1, $n2, $skips) = @_;
+		my($orig_l, $orig_n) = ($l1, $n1);
+		my($last_l, $last_n);
+		while($n1 <= $n2) {
+			while(exists $skips->{$n1}) {
+				add_map($table, $skips->{$n1}, $n1);
+				$n1++;
+			}
+			if(exists $table->{$l1}) {
+				die "$l1 -> $n1 cannot be mapped, already $table->{$l1}\n";
+			}
+			add_map($table, $l1, $n1);
+			$last_l = $l1;
+			$last_n = $n1;
+
+			# Shift to next letter combination.
+			my(@l1) = split //, $l1;
+			$l1[$#l1] =~ tr[a-zA-Z][b-zaB-ZA];
+			$l1 = join '', @l1;
+
+			$n1++;
+		}
+		if($last_l ne $l2 or $last_n != $n2) {
+			die "Mismatch in range $orig_l-$l2 $orig_n-$n2. Ended at $l1, $n1\n";
+		}
+	}
+
+	sub add_map {
+		my($map, $key, $val) = @_;
+		if(exists $map->{$key}) {
+			die "Cannot add $key -> $val to map, already -> $map->{$key}\n";
+		}
+		$map->{$key} = sprintf("%03d", $val);
+		#print "$key -> $val\n";
+	}
+
+
+	# Strictly speaking, is ellena coded as "ellen" or "ell"?
+	# Lazy solution (if I don't want to tag each entry as full or partial),
+	# if length > 3, then full.
+	my(%t);
+	add_map(\%t, 'a', 27);
+	fill(\%t, 'aa', 'al', 28, 39);
+	fill(\%t, 'ala', 'alz', 40, 65);
+	fill(\%t, 'am', 'az', 66, 79);
+	simple_range(\%t, 'b', 80, 106);
+	simple_range(\%t, 'c', 107, 133);
+	simple_range(\%t, 'd', 134, 160);
+	add_map(\%t, 'e', 161);
+	fill(\%t, 'ea', 'ed', 162, 165);
+	fill(\%t, 'eda', 'edz', 166, 192, {189=>'edward'});
+	fill(\%t, 'ee', 'el', 193, 200);
+	fill(\%t, 'ela', 'elz', 201, 228, {210 => 'elizabeth', 214 => 'ellen'});
+	fill(\%t, 'em', 'ez', 229, 242);
+	simple_range(\%t, 'f', 243, 269);
+	simple_range(\%t, 'g', 270, 296);
+	add_map(\%t, 'h', 297);
+	fill(\%t, 'ha', 'hz', 298, 324, {303=>'henry'});
+	simple_range(\%t, 'i', 325, 351);
+	add_map(\%t, 'j', 352);
+	add_map(\%t, 'ja', 353);
+	fill(\%t, 'jaa', 'jaz', 354, 380, {367=>'james'});
+	fill(\%t, 'jb', 'je', 381, 384);
+	fill(\%t, 'jea', 'jez', 385, 410);
+	fill(\%t, 'jf', 'jo', 411, 420);
+	fill(\%t, 'joa', 'joz', 421, 448, {429=>'john', 441=>'joseph'});
+	fill(\%t, 'jp', 'jz', 449, 459);
+	simple_range(\%t, 'k', 460, 486);
+	add_map(\%t, 'l', 487);
+	fill(\%t, 'la', 'le', 488, 492);
+	fill(\%t, 'lea', 'lez', 493, 518);
+	fill(\%t, 'lf', 'lo', 519, 528);
+	fill(\%t, 'loa', 'loz', 529, 554);
+	fill(\%t, 'lp', 'lz', 555, 565);
+	add_map(\%t, 'm', 566);
+	add_map(\%t, 'ma', 567);
+	fill(\%t, 'maa', 'maz', 568, 595, {586=>'margaret', 587=>'mary'});
+	fill(\%t, 'mb', 'mz', 596, 620);
+	simple_range(\%t, 'n', 621, 647);
+	simple_range(\%t, 'o', 648, 674);
+	simple_range(\%t, 'p', 675, 701);
+	simple_range(\%t, 'q', 702, 728);
+	add_map(\%t, 'r', 729);
+	fill(\%t, 'ra', 'rz', 730, 756, {745=>'robert'});
+	simple_range(\%t, 's', 757, 783);
+	simple_range(\%t, 't', 784, 810);
+	simple_range(\%t, 'u', 811, 837);
+	simple_range(\%t, 'v', 838, 864);
+	add_map(\%t, 'w', 865);
+	fill(\%t, 'wa', 'wi', 866, 874);
+	fill(\%t, 'wia', 'wiz', 875, 901, {887=>'william'});
+	fill(\%t, 'wj', 'wz', 902, 918);
+	simple_range(\%t, 'x', 919, 945);
+	simple_range(\%t, 'y', 946, 972);
+	simple_range(\%t, 'z', 973, 999);
+
+	return %t;
+}
+
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+
+
+package UniqueID::DriversLicense::Minnesota;
+@UniqueID::DriversLicense::Minnesota::ISA = ( "UniqueID::DriversLicense::USSharedMDMIMN" );
+
+sub state_long { 'Minnesota' }
+sub state_short { 'mn' }
+
+
+
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+
+
+package UniqueID::DriversLicense::Michigan;
+@UniqueID::DriversLicense::Michigan::ISA = ( "UniqueID::DriversLicense::USSharedMDMIMN" );
+
+sub state_long { 'Michigan' }
+sub state_short { 'mi' }
+
+
+
+
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+
+
+package UniqueID::DriversLicense::Maryland;
+@UniqueID::DriversLicense::Maryland::ISA = ( "UniqueID::DriversLicense::USSharedMDMIMN" );
+
+sub state_long { 'Maryland' }
+sub state_short { 'md' }
+
+
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+
+package UniqueID::Coding::MRZPassport;
+
+
+sub new {
+	my $class = shift;
+	$class = ref($class) if ref($class);
+
+	bless my $self = {}, $class;
+
+	return $self;
+}
+
+sub uid { 'mrzp' }
+sub display_name { "Machine Readable Passport MRZ Calculator" }
+sub describe {
+	my($link) = main::path_to_script();
+	my $grade = main::html_alphaware();
+	return <<_EODESC;
+$grade
+<p>
+Given passport information calculate
+the two line Machine Readable Zone (MRZ) for a Machine Readable Passport
+(MRP).  This encoding system is documented
+<a href="http://www.highprogrammer.com/alan/numbers/mrp.html">here</a>.
+You can also <a href="$link/mrzpr">decode an existing MRZ</a>.</p>
+_EODESC
+#'
+}
+
+sub options
+{
+	return(
+		["Sub-type", 'ptype', 'text', 1],
+		["Given name(s)", 'givennames', 'text', 40],
+		["Surname(s)", 'surnames', 'text', 40],
+		['Date of birth'],
+		[' Year', 'by', 'text', 4],
+		[' Month', 'bm', 'text', 2],
+		[' Day', 'bd', 'text', 2],
+		['Sex', 'sex', 'select', {'Male' => 'M', 'Female' => 'F', 'Unspecified' => '<'} ],
+		['Issuer', 'issuer', 'select', \%COUNTRY_TO_ALPHA3],
+		['Passport expiration'],
+		[' Year', 'ey', 'text', 4],
+		[' Month', 'em', 'text', 2],
+		[' Day', 'ed', 'text', 2],
+		["Passport number", 'passportnumber', 'text', 9],
+		["Personal number", 'pin', 'text', 14],
+		['Nationality', 'nationality', 'select', \%COUNTRY_TO_ALPHA3],
+	);
+}
+
+sub process
+{
+	my($self) = shift;
+	my(%params) = @_;
+	my(%error_fields, $error_explain, $output);
+# TODO FIXME XXX NO ERROR CHECKING IN PLACE YET
+	if((defined $error_explain and length $error_explain) or
+		scalar keys %error_fields){
+		return(\%error_fields, $error_explain, $output);
+	}
+
+	my $l1 = '';
+	$l1 .= 'P';
+	if(length $params{'ptype'}) { $l1 .= substr $params{'ptype'}, 0, 1; }
+	else { $l1 .= '<'; }
+	$l1 .= $params{'issuer'};
+
+	my $name1 = mrz_filter($params{'surnames'});
+	my $name2 = mrz_filter($params{'givennames'});
+	$l1 .= padtrim_to("$name1<<$name2", 39);
+
+
+	my $l2 = '';
+	$l2 .= padtrim_to($params{'passportnumber'}, 9);
+	$l2 .= calc_check_digit($l2);
+	$l2 .= $params{'nationality'};
+	$l2 .= sprintf "%02d%02d%02d", $params{'by'} % 100, $params{'bm'}, $params{'bd'};
+	$l2 .= calc_check_digit(substr $l2, 13, 6);
+	$l2 .= $params{'sex'};
+	$l2 .= sprintf "%02d%02d%02d", $params{'ey'} % 100, $params{'em'}, $params{'ed'};
+	$l2 .= calc_check_digit(substr $l2, 21, 6);
+	$l2 .= padtrim_to($params{'pin'}, 14);
+	$l2 .= calc_check_digit(substr $l2, 28, 14);
+	$l2 .= calc_check_digit(substr($l2, 0, 10).
+		substr($l2, 13, 7).substr($l2, 21, 22));
+
+	$output =
+		main::format_key_value('Machine Readable Zone', 
+			"<pre>".main::html_escape($l1)."\n"
+			.main::html_escape($l2)."</pre>\n")
+		.q(
+<p>For a variety of reasons there might be minor
+differences between the calculated number and your
+real number.  If you name is particularlly long
+abbreviations might have been used and individual names
+removed to make it fit.  The appears to be a country by
+country issue.  Also, if the second to last digit is 0 it
+might, under certain circumstances, be replaced with &lt;.
+		);
+
+	return(\%error_fields, $error_explain, $output);
+}
+
+sub mrz_filter {
+	my($in) = @_;
+	if(not defined $in) { $in = ''; }
+	$in = uc($in);
+	$in =~ s/\s+/ /g;
+	$in =~ s/[^A-Z0-9]/</g;
+	return $in;
+}
+
+sub padtrim_to {
+	my($line, $length) = @_;
+	$line .= "<"x$length;
+	return substr $line, 0, $length;
+}
+
+sub calc_check_digit {
+	return (UniqueID::Coding::MRZPassportReverse::calc_check_digit(@_));
+}
+
+
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+
+
+package UniqueID::Coding::MRZPassportReverse;
+
+
+sub new {
+	my $class = shift;
+	$class = ref($class) if ref($class);
+
+	bless my $self = {}, $class;
+
+	return $self;
+}
+
+sub uid { 'mrzpr' }
+sub display_name { "Machine Readable Passport MRZ Analyzer" }
+sub describe {
+	my($link) = main::path_to_script();
+	my $grade = main::html_alphaware();
+	return <<_EODESC;
+$grade
+<p>
+Given the two line Machine Readable Zone (MRZ) from a Machine Readable Passport
+(MRP), retrieve relevant information.  This encoding system is documented
+<a href="http://www.highprogrammer.com/alan/numbers/mrp.html">here</a>.
+You can also <a href="$link/mrzp">calculate an MRZ</a>.
+_EODESC
+#'
+}
+
+sub options
+{
+	return(
+		["MRZ Line One", 'l1', 'text', 44],
+		["MRZ Line Two", 'l2', 'text', 44],
+	);
+}
+
+sub process
+{
+	my($self) = shift;
+	my(%params) = @_;
+	my(%error_fields, $error_explain, $output);
+	
+	my($l1) = $params{'l1'};
+	if(not defined $l1 or length($l1) != 44) {
+		$error_fields{'l1'} .= "Please enter the 44 character line. ";
+	}
+	if($l1 =~ /[a-z]/) {
+		$error_fields{'l1'} .= "MRZs must be entirely upper case. ";
+	}
+	if($l1 !~ /^[a-zA-Z0-9<]{44}$/) {
+		$error_fields{'l1'} .= "MRZs are limited A-Z, 0-9 and &lt;. ";
+	}
+
+	my($l2) = $params{'l2'};
+	if(not defined $l2 or length($l2) != 44) {
+		$error_fields{'l2'} .= "Please enter the 44 character line. ";
+	}
+	if($l2 =~ /[a-z]/) {
+		$error_fields{'l2'} .= "MRZs must be entirely upper case. ";
+	}
+	if($l2 !~ /^[A-Z0-9<]{44}$/) {
+		$error_fields{'l2'} .= "MRZs are limited A-Z, 0-9 and &lt;. ";
+	}
+
+	if((defined $error_explain and length $error_explain) or
+		scalar keys %error_fields){
+		return(\%error_fields, $error_explain, $output);
+	}
+
+	my($error1, $ptype, $pptype, $issuer, $surnames, $givennames) 
+		= process_mrz1($l1);
+	if(defined $error1) { $error_fields{'l1'} .= $error1." "; }
+
+
+	my($error2, $ppnum, $c1, $nationality, $birth, $c2, $sex, $expire, $c3, $pin, $c4, $cx) = process_mrz2($l2);
+	if(defined $error2) { $error_fields{'l2'} .= $error2." "; }
+
+	if((defined $error_explain and length $error_explain) or
+		scalar keys %error_fields){
+		return(\%error_fields, $error_explain, $output);
+	}
+
+	my $mrz1 = main::html_escape($l1);
+	my $mrz2 = main::html_escape($l2);
+	my $mrz = "<pre>$mrz1\n$mrz2</pre>";
+
+	$output =
+		main::format_key_value('Machine Readable Zone', $mrz).
+		main::format_key_value('Document type', $ptype).
+		main::format_key_value('Sub-type', $pptype).
+		main::format_key_value('Surnames (Family Name)', $surnames).
+		main::format_key_value('Date of Birth', $birth).
+		main::format_key_value('Sex', $sex).
+		main::format_key_value('Given names', $givennames).
+		main::format_key_value('Issuing Country or Organization', code_to_country($issuer)." ($issuer)").
+		main::format_key_value('Passport Expires', $expire).
+		main::format_key_value('Passport Number', $ppnum).
+		main::format_key_value('Personal Number', $pin).
+		main::format_key_value('Nationality', code_to_country($nationality)." ($nationality)").
+		main::format_key_value('Check digit 1', $c1).
+		main::format_key_value('Check digit 2', $c2).
+		main::format_key_value('Check digit 3', $c3).
+		main::format_key_value('Check digit 4', $c4).
+		main::format_key_value('Final Check digit', $cx).
+		"";
+
+	return(\%error_fields, $error_explain, $output);
+}
+
+sub process_mrz1 {
+	my($line) = @_;
+
+	my($passport, $pptype, $countrycode, $name) = ($line =~ /(.)(.)(...)(.+)/);
+	if(not defined $name) {
+		return 'Invalid line.';
+	}
+
+	my $ptype = "Unknown (type $passport)";
+	if($passport eq 'P') { $ptype = 'Passport'; }
+
+	if($pptype eq '<') {
+		$pptype = 'None';
+	} else {
+		$pptype .= ' (Specific meaning is per-country)';
+	}
+
+	my($surnames, $givennames) = ($name =~ /(.*?)<<(.+)/);
+	$surnames = trim($surnames);
+	$givennames = trim($givennames);
+
+	return(undef, $ptype, $pptype, $countrycode, $surnames, $givennames);
+}
+
+sub process_mrz2 {
+	my($line) = @_;
+	my($ppnum, $c1, $nation, $birthyy, $birthmm, $birthdd, $c2,
+		$sex, $expyy, $expmm, $expdd, $c3, $pin, $c4, $cx) = ($line =~
+			/^(.........)(.)(...)(..)(..)(..)(.)(.)(..)(..)(..)(.)(..............)(.)(.)$/);
+	if(not defined $cx) { return 'Invalid line.'; }
+
+	if($pin eq '<<<<<<<<<<<<<<') { $pin = 'None specified'; }
+
+	if($sex eq 'M') { $sex = 'Male'; }
+	elsif($sex eq 'F') { $sex = 'Female'; }
+	elsif($sex eq '<') { $sex = 'Unspecified'; }
+	else {$sex = 'Invalid entry!'; }
+
+	$c1 = confirm_check_digit($c1, substr $line,  0, 9);
+	$c2 = confirm_check_digit($c2, substr $line, 13, 6);
+	$c3 = confirm_check_digit($c3, substr $line, 21, 6);
+	if($c4 eq '<' and substr($line, 28, 14) eq '<<<<<<<<<<<<<<') { $c4 = 0; }
+	$c4 = confirm_check_digit($c4, substr $line, 28, 14);
+
+	$cx = confirm_check_digit($cx, 
+		substr($line, 0, 10).
+		substr($line, 13, 7).
+		substr($line, 21, 22)
+		);
+
+	return(undef, trim($ppnum), $c1, $nation, "$birthyy-$birthmm-$birthdd", $c2, $sex, "$expyy-$expmm-$expdd", $c3, trim($pin), $c4, $cx);
+}
+
+sub code_to_country {
+	if(exists $ALPHA3_TO_COUNTRY{$_[0]}) {
+		return $ALPHA3_TO_COUNTRY{$_[0]};
+	}
+	return 'Unknown';
+}
+
+sub trim {
+	my($in) = @_;
+	$in =~ s/</ /g;
+	$in =~ s/\s*$//;
+	return $in;
+}
+
+sub confirm_check_digit {
+	my($c1, $input) = @_;
+	my($cc1) = calc_check_digit($input);
+	if($c1 eq $cc1) { return "Okay ($c1)"; }
+	return "Invalid (Is $c1, should be $cc1)";
+}
+
+sub calc_check_digit {
+	my($input) = @_;
+	my(@chunks) = split(//, $input);
+	my(%map) = qw( 0 0 1 1 2 2 3 3 4 4 5 5 6 6 7 7 8 8 9 9 A 10 B 11 C 12 D 13 E 14 F 15 G 16 H 17 I 18 J 19 K 20 L 21 M 22 N 23 O 24 P 25 Q 26 R 27 S 28 T 29 U 30 V 31 W 32 X 33 Y 34 Z 35 < 0 );
+	my(@weights) = qw( 7 3 1 );
+	my $i = 0;
+	my $sum = 0;
+	foreach my $chunk (@chunks) {
+		my($value) = $map{uc($chunk)};
+		if(not defined $value) {
+			return (undef, "Invalid character '$chunk'.");
+		}
+		my $step = $i % scalar @weights;
+		my $mult = $value * $weights[$step];
+		$sum += $mult;
+		$i++;
+	}
+
+	return $sum % 10;
+}
+
+
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+
+package main;
+
+
+
+my(%CATEGORIES);
+sub add_category {
+	my($i) = @_;
+	die $i->uid()." already exists" if exists $CATEGORIES{$i->uid()};
+	$CATEGORIES{$i->uid()} = $i;
+}
+add_category(UniqueID::DriversLicense::Wisconsin->new());
+add_category(UniqueID::DriversLicense::WisconsinReverse->new());
+add_category(UniqueID::Coding::Soundex->new());
+add_category(UniqueID::DriversLicense::Illinois->new());
+add_category(UniqueID::DriversLicense::IllinoisReverse->new());
+add_category(UniqueID::DriversLicense::Florida->new());
+add_category(UniqueID::DriversLicense::FloridaReverse->new());
+add_category(UniqueID::DriversLicense::Washington->new());
+add_category(UniqueID::DriversLicense::NewHampshire->new());
+add_category(UniqueID::DriversLicense::Minnesota->new());
+add_category(UniqueID::DriversLicense::Maryland->new());
+add_category(UniqueID::DriversLicense::Michigan->new());
+add_category(UniqueID::DriversLicense::NewYork1992->new());
+add_category(UniqueID::Coding::DLFirstMiddle->new());
+add_category(UniqueID::Coding::MRZPassportReverse->new());
+add_category(UniqueID::Coding::MRZPassport->new());
+
+
+
+main();
+exit;
+
+
+#===============================================================================
+sub main
+{
+	my(@params);
+	# old versions of CGI just die on failure.
+	eval { @params = param(); };
+
+	{
+		my $failure = $@;
+		my $cgi_error = eval {CGI::cgi_error()};
+		if($failure or (@params == 0 and $cgi_error)) {
+			print "Content-type: text/html\n\n";
+			fatal_error("Your web browser sent an unexpectedly large request.  This software is unwilling to accept requests that large.  Please try again.  If the error persists, most likely your web browser is broken.");
+			return;
+		}
+	}
+
+	my($category) = param('type');
+	if(not defined $category) {
+		my($tmp) = $ENV{'PATH_INFO'};
+		($category) = ($tmp =~ m|/*([^/]+)|) if defined $tmp;
+	}
+
+	if(defined $category and $category eq $INTERNAL_CSS) {
+		print "Content-type: text/css\n\n";
+		print get_internal_css();
+		return;
+	}
+
+	print "Content-type: text/html\n\n";
+	if(not defined $category) {
+		print get_header();
+		print get_full_list();
+		print get_footer();
+		return;
+	}
+
+	my($impl) = $CATEGORIES{$category};
+	if(not defined $impl)
+	{
+		fatal_error(qq(The tool "$category" was requested.  There is no tool with that name.));
+	}
+
+
+	my %params;
+	foreach my $p (@params)
+	{
+		$params{$p} = param($p);
+	}
+	$params{'type'} = $category;
+
+	my($step) = param('step');
+	if(not defined $step)
+	{
+		print get_header($category);
+		print get_impl_form($impl, \%params, {});
+		print get_footer();
+		return;
+	}
+
+	print get_header($category);
+	my($error_fields, $error_explain, $output) =
+		$impl->process(%params);
+	print qq(<div class="resultsframe">\n);
+	print "<h2 class=\"resultsareaheader\">".$impl->display_name()." Results</h2>\n";
+	print qq(<div class="resultsbody">\n);
+	print qq(<div class="resultsareainputouter">\n);
+	print "<h3 class=\"resultsareainputheader\">Input</h3>\n";
+	print qq(<div class="resultsareainputinner">\n);
+	print describe_params($impl, %params);
+	print "</div>\n";
+	print "</div>\n";
+	print qq(<div class="resultsareaoutputouter">\n);
+	print "<h3 class=\"resultsareaoutputheader\">Output</h3>\n";
+	print qq(<div class="resultsareaoutputinner">\n);
+	print "$output \n" if defined $output;
+	print "$error_explain\n" if defined $error_explain;
+	print "</div>\n";
+	print "</div>\n";
+	print "</div>\n";
+	print "</div>\n";
+	print qq(<p><hr class="resultshr">\n);
+	print get_impl_form($impl, \%params, $error_fields);
+	print get_footer();
+}
+
+#===============================================================================
+sub describe_params {
+	my($impl, %params) = @_;
+	my(@options) = $impl->options();
+	my $ret = '';
+	foreach my $option (@options) {
+		my($label, $name, $type, @other) = @{$option};
+		my $val = '';
+		if(defined $name) {
+			$val = $params{$name} || '';
+		}
+		$val =~ s/&/\&amp;/g;
+		$val =~ s/</\&lt;/g;
+		$val =~ s/>/\&gt;/g;
+		$ret .= format_key_value($label, $val);
+	}
+	return $ret;
+}
+
+#===============================================================================
+sub get_impl_form {
+	my($impl, $params, $error_fields) = @_;
+	my $ret = '';
+	$ret .= 
+		qq(<div class="inputformframe">\n).
+	    '<h2 class="inputformheader">'.$impl->display_name().'</h2>'.
+		qq(<div class="inputformbody">\n).
+		$impl->describe().
+		get_form_header(path_to_script()."/".$impl->uid(), "realinput").
+		get_form_options($impl->uid(), [$impl->options()], $params, $error_fields).
+		get_form_footer().
+		"</div>\n".
+		"</div>\n".
+		'';
+
+}
+
+#===============================================================================
+sub get_header
+{
+	my($this_type) = @_;
+	$this_type = '' if not defined $this_type;
+	my $ret = '';
+	my $display_name = 'Select a category';
+	if(defined $this_type and defined $CATEGORIES{$this_type}) {
+		$display_name = $CATEGORIES{$this_type}->display_name();
+	}
+
+	my($link) = main::path_to_script();
+
+	my $css_url = $CSS_URL;
+	$css_url ||= "$link/$INTERNAL_CSS";
+
+	# Auto set focus to first field?
+	# In header:
+	# <script type="text/javascript"> function uidinit() { if(document.realinput) { document.realinput.elements[0].focus() } } </script>
+	# <body onload="uidinit()">
+	$ret .= <<_EOHEADER;
+<html>
+<head>
+<title>Unique ID: $display_name</title>
+</head>
+<link rel="StyleSheet" type="text/css" href="$css_url">
+<body>
+<div class="headerframe">
+<h1>Unique ID</h1>
+_EOHEADER
+	$ret .= qq(<div class="headerbody">\n);
+	$ret .= get_form_header();
+	$ret .= "<p><a href=\"$link\">Other tools:</a>\n";
+	$ret .= qq(<select class="briefselect" name="type">\n);
+	foreach my $key (sort { $CATEGORIES{$a}->display_name() cmp $CATEGORIES{$b}->display_name() } keys %CATEGORIES)
+	{
+		my $name = $CATEGORIES{$key}->display_name();
+		my $selected = '';
+		$selected = ' selected' if $key eq $this_type;
+		$ret .= qq(<option value="$key"$selected>$name</option>\n);
+	}
+	$ret .= qq(</select>\n);
+	$ret .= get_form_footer('Go');
+	$ret .= "</p>\n";
+	$ret .= "</div>\n";
+	$ret .= "</div>\n";
+	$ret .= qq(<hr class="headerhr">\n);
+	return $ret;
+}
+
+#===============================================================================
+sub get_form_header
+{
+	my($path, $name) = @_;
+	$path ||= path_to_script();
+	if(defined $name) { $name = " name=\"$name\""; }
+	else { $name = ""; }
+	return qq(<form action="$path"$name method=post>\n);
+}
+#===============================================================================
+sub get_form_footer
+{
+	my($label) = @_;
+	$label ||= 'Submit';
+	return qq(<input type="submit" value="$label">\n</form>\n);
+}
+
+#===============================================================================
+sub get_full_list {
+	my $ret = '';
+	$ret .= qq(<div class="fullindexframe">\n);
+	$ret .= "<h2 class=\"fullindexareaheader\">Available Tools</h2>\n";
+	$ret .= qq(<div class="fullindexbody">\n);
+	$ret .= "<ul>\n";
+
+	my($link) = main::path_to_script();
+
+	foreach my $key (sort { $CATEGORIES{$a}->display_name() cmp $CATEGORIES{$b}->display_name() } keys %CATEGORIES)
+	{
+		my $name = $CATEGORIES{$key}->display_name();
+		my $linkname = $CATEGORIES{$key}->uid();
+		$ret .= <<ENDENTRY;
+    <li><a href="$link/$linkname">$name</a></li>
+ENDENTRY
+	}
+
+	$ret .= "</ul>\n";
+	$ret .= "</div>\n";
+	$ret .= "</div>\n";
+	return $ret;
+}
+
+#===============================================================================
+sub fatal_error {
+		print get_header();
+		print <<ENDERROR;
+<div class="errorframe">
+<h2 class="errorareaheader">A Problem Was Encountered</h2>
+<div class="errorbody">
+<p>@_</p>
+</div>
+</div>
+<hr class="errorareahr">
+ENDERROR
+		print get_full_list();
+		print get_footer();
+		exit;
+}
+#===============================================================================
+sub get_footer
+{
+	return <<END_FOOTER;
+<hr class="footerhr">
+
+<div class="footerframe">
+<p>Results by $PROGRAM_NAME version $VERSION, Copyright $COPYRIGHT_YEAR <a href="http://www.highprogrammer.com/alan/">Alan De Smet</a>
+
+<p>This software and its generated results come with <strong>absolutely no warranty</strong>.
+
+<p>
+<a href="http://www.highprogrammer.com/alan/numbers/">About Unique ID</a>
+&nbsp; | &nbsp;
+<a href="http://www.highprogrammer.com/alan/numbers/software.html">Download this software</a>
+&nbsp; | &nbsp;
+<a href="http://www.highprogrammer.com/alan/numbers/bugs.html">Report a Bug</a>
+&nbsp; | &nbsp;
+<a href="http://www.highprogrammer.com/alan/numbers/disclaimer.html">Disclaimer</a>
+</p>
+
+
+</div>
+
+</body>
+</html>
+END_FOOTER
+}
+
+
+#===============================================================================
+sub get_form_options
+{
+	my $MAX_RADIO_LENGTH = 3;
+	my($uid, $options, $params, $errors) = @_;
+	my(%params) = %{$params};
+	my(%errors) = %{$errors};
+	my($ret) = '';
+	$ret .= '<table>'."\n";
+	foreach my $option (@{$options}) {
+		my($label, $name, $type, @other) = @{$option};
+		my($indent) = ($label =~ /^( *)/);
+		$indent =~ s/ /\&nbsp;\&nbsp;\&nbsp;/g;
+		$label =~ s/^ */$indent/g;
+		$ret .= '<tr><td>'.format_label($label).'</td><td>';
+		if(defined $name and defined $type) {
+			my($value) = $params{$name} || '';
+			if($type eq 'select') {
+				if(scalar keys %{$other[0]} <= $MAX_RADIO_LENGTH) {
+					foreach my $label (sort keys %{$other[0]}) {
+						my $key = $other[0]{$label};
+						my $sel = ($key eq $value) ? ' checked' : '';
+						$ret .= qq(<input type="radio" name="$name" value="$key"$sel> $label<br>);
+					}
+				} else {
+					$ret .= qq(<select name="$name">\n);
+					foreach my $label (sort keys %{$other[0]}) {
+						my $key = $other[0]{$label};
+						my $sel = ($key eq $value) ? ' selected' : '';
+						$ret .= qq(<option value="$key"$sel>$label</option>\n);
+					}
+					$ret .= qq(</select>\n);
+				}
+			} else {
+				# hopefully $type eq 'text'
+				my($length) = $other[0] || 10;
+				$ret .= qq(<input type="text" class="text" name="$name" value="$value" size="$length">);
+			}
+		}
+		$ret .= "<td>";
+		if(defined $errors{$name}) {
+			$ret .= "Error: $errors{$name}";
+		}
+		$ret .= "</td></tr>\n";
+	}
+	$ret .= "</table>\n";
+	$ret .= qq(<input type="hidden" NAME="type" value="$uid">);
+	$ret .= qq(<input type="hidden" name="step" value="1">);
+	return $ret;
+}
+
+sub get_internal_css() {
+	return <<ENDRET;
+body {
+	margin-left: 3em;
+	margin-right: 3em;
+	color: black;
+}
+:Link { color: #0000FF; }
+:Visited { color: #660099; }
+:Active { color: #FF0000; }
+
+input:Link { color: black; }
+input:Visited { color: black; }
+input:Active,select:Active { color: black; }
+
+.resultsframe,
+.inputformframe,
+.fullindexframe
+{
+	background-color: #55CC55;
+	margin-top: 1em;
+	margin-bottom: 1em;
+	border: 2px solid black;
+}
+
+.errorframe
+{
+	background-color: #CC5555;
+	margin-top: 1em;
+	margin-bottom: 1em;
+	border: 2px solid black;
+}
+
+.resultsbody,
+.inputformbody,
+.fullindexbody,
+.errorbody
+{
+	padding-left: 1em;
+	padding-right: 1em;
+	padding-top: 0.5em;
+	padding-bottom: 0.5em;
+}
+
+
+.footerframe {
+	background-color: #99EE99;
+	padding-left: 1em;
+	padding-right: 1em;
+	padding-top: 0.5em;
+	padding-bottom: 0.5em;
+	margin-top: 1em;
+	margin-bottom: 1em;
+	border: 2px solid #AAAAAA;
+}
+
+.headerframe {
+	background-color: #99EE99;
+	padding-left: 1em;
+	padding-right: 1em;
+	padding-top: 0.2em;
+	padding-bottom: 0;
+	margin-top: 1em;
+	margin-bottom: 1em;
+	border: 2px solid #AAAAAA;
+}
+.headerbody p {
+	margin: 0;
+	padding: 0;
+}
+
+.briefselect {
+/*	background-color: #77DD77; */
+}
+
+.footerframe {
+	font-size: 75%;
+	padding-top: 0;
+	padding-bottom: 0;
+}
+.footerframe p {
+	margin-top: 0.4em;
+	margin-bottom: 0.4em;
+}
+
+.errorframe {
+	font-style: italic;
+}
+
+
+
+input[type="text"] {
+	border: 1px solid black;
+	padding: 0.1em;
+}
+
+radio {
+	border: 1px solid black;
+}
+
+h1 {
+	margin: 0;
+	margin-bottom: 0.3em;
+	padding: 0;
+}
+
+h2 {
+	font-size: 150%;
+	padding-left: 0.6667em;
+	padding-bottom: 0.2em;
+	margin: 0;
+	background-color: #77DD77;
+}
+
+h2.errorareaheader {
+	padding-left: 1em;
+	margin: 0;
+	background-color: #dd7777;
+}
+
+
+.resultsareaoutputinner,
+.resultsareainputinner {
+	margin-left: 1.5em;
+}
+
+.headerhr,
+.footerhr,
+.resultshr,
+.errorareahr {
+	display: none;
+}
+
+input.text {
+	font-family: monospace;
+}
+ENDRET
+#/* Test */
+#h1 { border: 1px solid green; }
+#.resultsareainput { border: 4px dashed green; }
+#.resultsareaoutput { border: 4px solid blue; }
+#.errorarea { margin-left: 5em; }
+#.errorareahr { margin-left: 2em; }
+#ENDRET
+}

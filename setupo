@@ -1,0 +1,8 @@
+export PLAYER_HOME=~/cvs/player
+export PATH=$PLAYER_HOME/bin:$PATH
+. setup_dba
+export DBTYPE=mysql
+connect player/deck
+export LC_ALL=C
+export TMP=/o/tmp
+export TMP2=/v/tmp

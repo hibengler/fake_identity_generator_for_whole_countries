@@ -1,0 +1,103 @@
+Fake Identity Generator
+Copyright (C) 2011-2016 Hibbard M. Engler (Bitcoin address 1ERDHsxtekdh5FAsxdb92PBFK7nnuwMkbp for gifts)
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+
+
+umount /u1
+umount /s1
+mdadm --stop /dev/md0
+mdadm --stop /dev/md1
+
+modify /etc/fstab
+
+
+Personalities : [linear] [multipath] [raid0] [raid1] [raid6] [raid5] [raid4] [ra
+id10] 
+md1 : active raid0 sda4[0] sdb2[1] sdc2[2]
+      257908736 blocks super 1.2 512k chunks
+      
+md0 : active raid0 sdb1[1] sdc1[2] sda3[0]
+      85931008 blocks super 1.2 512k chunks
+      
+Reconfigure using fdisk
+
+I make a dummy first record so that the boudnary is aligned to 65535 -
+that way both partitions should be aligned and read and write quickly.  
+
+then zero out the new partitions
+
+cp /dev/null /etc/mdadm/mdadm.conf
+
+
+dpkg-reconfigure mdadm - fix boot degraded crap
+then reboot
+
+
+then tell the boot about the change:
+update-initramfs -u
+
+then halt and turn off the fucking machine (latent cache or something)
+
+Then turn it back on
+
+
+OK now we should be ok
+with NO files under /proc/mdstat
+
+
+
+mdadm /dev/md0 --create --auto yes -l 0 -n 3 /dev/sda3 /dev/sdb2 /dev/sdc2
+mdadm /dev/md1 --create --auto yes -l 0 -n 3 /dev/sda4 /dev/sdb3 /dev/sdc3
+mkfs -t ext4 -j /dev/md1
+
+
+
+
+
+cd /etc/mdadm
+mdadm --detail --scan >mdadm.conf
+
+Then change to md1 and md0
+
+
+
+then
+update-initramfs -u
+
+then:
+reboot
+
+
+Then reboot to check
+Then add u1 to /etc/fstab
+then reboot again
+
+
+
+
+
+
+
+OH yeah
+cd /etc/default
+me grub
+uncomment:
+GRUB_DISABLE_RECOVERY="true"
+
+then:
+update-grub
+

@@ -1,0 +1,60 @@
+#
+# Fake Identity Generator
+# Copyright (C) 2011-2016 Hibbard M. Engler (Bitcoin address 1ERDHsxtekdh5FAsxdb92PBFK7nnuwMkbp for gifts)
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+
+make_singleton_prep.txt: ../common/singleton_gender.txt ../common/singleton_lname.txt \
+ ../common/singleton_fname.txt ../common/singleton_minit.txt ../common/singleton_mname.txt \
+ ../common/singleton_suffix.txt ../common/minit_fake.txt
+	touch make_singleton_prep.txt
+
+
+../common/singleton_gender.txt: singletons.txt
+	@echo singleton_gender.txt main no initialed first names 
+	time field -24 26 <singletons.txt | clip_to_1_char 1 | fielduc -s >y6.txt 1
+	mv y6.txt ../common/singleton_gender.txt
+
+../common/singleton_lname.txt: singletons.txt
+	@echo singleton_lname.txt main no initialed first names 
+	time field -24 26 3 <singletons.txt | clip_to_1_char 1 | fielduc -s -m1 1 2 >y1.txt
+	mv y1.txt ../common/singleton_lname.txt
+
+../common/singleton_fname.txt: singletons.txt
+	@echo singleton_fname.txt main no initialed first names 
+	time field -24 26 4 <singletons.txt | clip_to_1_char 1 | fielduc -s -m1 1 2 >y2.txt
+	mv y2.txt ../common/singleton_fname.txt
+ 
+../common/singleton_fname.txt: singletons.txt
+	@echo singleton_fname.txt main no initialed first names 
+	time field -24 26 4 <singletons.txt | clip_to_1_char 1 | fielduc -s -m1 1 2 >y2.txt
+	mv y2.txt ../common/singleton_fname.txt
+ 
+../common/singleton_minit.txt: singletons.txt
+	@echo singleton_minit.txt main no initialed first names 
+	time field -24 26 5 <singletons.txt | clip_to_1_char 1 | fielduc -s -m1 1 2 >y3.txt
+	mv y3.txt ../common/singleton_minit.txt
+
+../common/singleton_mname.txt: singletons.txt
+	@echo singleton_mname.txt main no initialed first names 
+	time field -24 26 5 6 <singletons.txt | clip_to_1_char 1 | fielduc -s -m2 1 2 3  >y4.txt
+	mv y4.txt ../common/singleton_mname.txt
+ 
+../common/singleton_suffix.txt: singletons.txt
+	@echo singleton_suffix.txt main no initialed first names 
+	time field -24 26 20 <singletons.txt | clip_to_1_char 1 | fielduc -s -m1 1 2  >y5.txt
+	mv y5.txt ../common/singleton_suffix.txt
+

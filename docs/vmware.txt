@@ -1,0 +1,77 @@
+Fake Identity Generator
+Copyright (C) 2011-2016 Hibbard M. Engler (Bitcoin address 1ERDHsxtekdh5FAsxdb92PBFK7nnuwMkbp for gifts)
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+In order to get money incorporated into the system,
+We need vmware for kcd.com, jingservice.com, and dev.kcd.com
+
+So the best way is to interface witht he existing hard drives.
+Here is how to do it:
+
+1. plug in the hard drives
+2. check out the file systems
+
+
+
+mdadm --stop /dev/md124
+mdadm --stop /dev/md125
+mdadm --stop /dev/md126
+mdadm --stop /dev/md127
+
+# obviously sde would be here too
+mdadm -A /dev/md2 /dev/sdd1 /dev/sde1
+mdadm -A /dev/md3 /dev/sdd2 /dev/sde2
+mdadm -A /dev/md4 /dev/sdd3 /dev/sde3
+mdadm -A /dev/md5 /dev/sdd4 /dev/sde4
+
+# this section is for our ernie dev 
+mdadm -A /dev/md2 --run /dev/sdd1
+mdadm -A /dev/md3 --run /dev/sdd2
+mdadm -A /dev/md4 --run /dev/sdd3
+mdadm -A /dev/md5 --run /dev/sdd4
+
+
+cd /etc/mdadm
+mdadm --detail --scan >mdadm.conf
+update-initramfs -u
+
+
+Then reboot to check
+Then add u... to /etc/fstab
+
+fsck /dev/md2
+# md3 is swap
+fsck /dev/md3
+fsck /dev/md4
+fsck /dev/md5
+
+mkdir /ernie
+
+mount /dev/md2 /ernie
+mount /dev/md4 /ernie/b
+mount /dev/md5 /ernie/u
+
+
+OK - so we are getting vmware-player-4.0.4
+cd ~/install/vmware64
+Needed patched and apt-get install patch but works.
+
+
+vmplayer - the name
+
+
+/etc/vmnet/networking sets the networks 
+

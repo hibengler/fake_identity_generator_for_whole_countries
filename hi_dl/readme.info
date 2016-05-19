@@ -1,0 +1,436 @@
+#
+# Fake Identity Generator
+# Copyright (C) 2011-2016 Hibbard M. Engler (Bitcoin address 1ERDHsxtekdh5FAsxdb92PBFK7nnuwMkbp for gifts)
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+http://www.docusearch.com/dmv_config.html
+By State
+
+State
+	
+	
+	Configuration
+		
+		
+		State
+			
+			
+			Configuration
+			Alabama 	
+			
+			1-7 num
+				Mississippi 	
+				
+				9 num or SSN
+				Alaska 	
+				
+				1-7 num
+					Missouri 	
+					
+					9 num or SSN
+					Arizona 	
+					
+					*see below
+						Montana 	
+						
+						1 ltr, 6 num or SSN
+						Arkansas 	
+						
+						8 or 9 num
+							Nebraska 	
+							
+							1 ltr, 3-8 num
+							California 	
+							
+							1 ltr, 7 num
+								Nevada 	
+								
+								SSN
+								Colorado 	
+								
+								1-2 ltr, 1-6 num
+									New Hampshire 	
+									
+									2 num, 3 ltr, 5 num
+									Connecticut 	
+									
+									9 num
+										New Jersey 	
+										
+										1 ltr, 14 num
+										Delaware 	
+										
+										1-6 num
+											New Mexico 	
+											
+											8 num or SSN
+											Dist Of Columbia 	
+											
+											SSN
+												New York 	
+												
+												1 ltr, 18 num
+												Florida 	
+												
+												1 ltr, 12 num
+													North Carolina 	
+													
+													1-7 num or 8 num
+													Georgia 	
+													
+													7-9 num
+														North Dakota 	
+														
+														9 num
+														Hawaii 	
+														
+														9 num
+															Ohio 	
+															
+															2 ltr, 6 num or SSN
+															Idaho 	
+															
+															SSN
+																Oklahoma 	
+																
+																9 num
+																Illinois 	
+																
+																1 ltr, 11 num
+																	Oregon 	
+																	
+																	1-7 num
+																	Indiana 	
+																	
+																	1 ltr, 9 num or 9 or 10 num
+																		Pennsylvania 	
+																		
+																		6-8 num
+																		Iowa 	
+																		
+																		3 num, 2 ltr, 4 num or SSN
+																			Rhode Island 	
+																			
+																			7 num
+																			Kansas 	
+																			
+																			6 alphanum
+																				South Carolina 	
+																				
+																				7 num
+																				Kentucky 	
+																				
+																				1 ltr,12 num or SSN
+																					South Dakota 	
+																					
+																					7 num
+																					Louisiana 	
+																					
+																					9 num
+																						Tennessee 	
+																						
+																						7 or 8 num
+																						Maine 	
+																						
+																						7 num
+																							Texas 	
+																							
+																							8 num
+																							Maryland 	
+																							
+																							1 ltr, 12 num
+																								Utah 	
+																								
+																								1-9 alphanum
+																								Massachusetts 	
+																								
+																								SSN
+																									Vermont 	
+																									
+																									7-8 num
+																									Michigan 	
+																									
+																									1 ltr, 12 num
+																										Virginia 	
+																										
+																										9 num or 1 ltr, 8 num
+																										Minnesota 	
+																										
+																										1 ltr, 12 num
+																											Washington 	
+																											
+																											12 alphanum
+																											  	
+																												
+																												 
+																												 	West Virginia 	
+																													
+																													2 alphanum, 5 num
+																													  	
+																														
+																														 
+																														 	Wisconsin 	
+																															
+																															1 ltr, 13 num
+																															  	
+																																
+																																 
+																																 	Wyoming 	
+																																	
+																																	1-10 num
+																																	  	
+																																		
+																																		 
+																																		 	  	
+																																				
+																																				 
+																																				 *1 ltr, 3-6 num or 2 ltr, 3-5 num or 1 ltr, 8 num, or SSN
+																																				   	  	 
+																																						   	  	 
+																																								   	  	 
+																																										 XInvestigation
+																																										 All Searches
+																																										 People Searches
+																																										 DMV Searches
+																																										 Telephone Searches
+																																										 Asset Searches
+																																										 Criminal Searches
+																																										 Civil Searches
+																																										 Business Searches
+																																										 Dossiers
+																																										 XClient Area
+																																										 Check Order Status
+																																										 View Search Results
+																																										 Client Support
+																																										 XMedia Center
+																																										 What Clients Are Saying
+																																										 What The Media Is Saying
+																																										 Site Map
+																																										 Free Resources
+																																										 Privacy Statements
+																																										   	  	 
+																																												   	  	 
+																																														   	  	 
+																																																 
+																																																 
+																																																 
+By State
+
+State
+	
+
+Configuration
+	
+
+State
+	
+
+Configuration
+Alabama 	
+
+1-7 num
+	Mississippi 	
+
+9 num or SSN
+Alaska 	
+
+1-7 num
+	Missouri 	
+
+9 num or SSN
+Arizona 	
+
+*see below
+	Montana 	
+
+1 ltr, 6 num or SSN
+Arkansas 	
+
+8 or 9 num
+	Nebraska 	
+
+1 ltr, 3-8 num
+California 	
+
+1 ltr, 7 num
+	Nevada 	
+
+SSN
+Colorado 	
+
+1-2 ltr, 1-6 num
+	New Hampshire 	
+
+2 num, 3 ltr, 5 num
+Connecticut 	
+
+9 num
+	New Jersey 	
+
+1 ltr, 14 num
+Delaware 	
+
+1-6 num
+	New Mexico 	
+
+8 num or SSN
+Dist Of Columbia 	
+
+SSN
+	New York 	
+
+1 ltr, 18 num
+Florida 	
+
+1 ltr, 12 num
+	North Carolina 	
+
+1-7 num or 8 num
+Georgia 	
+
+7-9 num
+	North Dakota 	
+
+9 num
+Hawaii 	
+
+9 num
+	Ohio 	
+
+2 ltr, 6 num or SSN
+Idaho 	
+
+SSN
+	Oklahoma 	
+
+9 num
+Illinois 	
+
+1 ltr, 11 num
+	Oregon 	
+
+1-7 num
+Indiana 	
+
+1 ltr, 9 num or 9 or 10 num
+	Pennsylvania 	
+
+6-8 num
+Iowa 	
+
+3 num, 2 ltr, 4 num or SSN
+	Rhode Island 	
+
+7 num
+Kansas 	
+
+6 alphanum
+	South Carolina 	
+
+7 num
+Kentucky 	
+
+1 ltr,12 num or SSN
+	South Dakota 	
+
+7 num
+Louisiana 	
+
+9 num
+	Tennessee 	
+
+7 or 8 num
+Maine 	
+
+7 num
+	Texas 	
+
+8 num
+Maryland 	
+
+1 ltr, 12 num
+	Utah 	
+
+1-9 alphanum
+Massachusetts 	
+
+SSN
+	Vermont 	
+
+7-8 num
+Michigan 	
+
+1 ltr, 12 num
+	Virginia 	
+
+9 num or 1 ltr, 8 num
+Minnesota 	
+
+1 ltr, 12 num
+	Washington 	
+
+12 alphanum
+  	
+
+ 
+	West Virginia 	
+
+2 alphanum, 5 num
+  	
+
+ 
+	Wisconsin 	
+
+1 ltr, 13 num
+  	
+
+ 
+	Wyoming 	
+
+1-10 num
+  	
+
+ 
+	  	
+
+ 
+*1 ltr, 3-6 num or 2 ltr, 3-5 num or 1 ltr, 8 num, or SSN
+  	  	 
+  	  	 
+  	  	 
+XInvestigation
+All Searches
+People Searches
+DMV Searches
+Telephone Searches
+Asset Searches
+Criminal Searches
+Civil Searches
+Business Searches
+Dossiers
+XClient Area
+Check Order Status
+View Search Results
+Client Support
+XMedia Center
+What Clients Are Saying
+What The Media Is Saying
+Site Map
+Free Resources
+Privacy Statements
+  	  	 
+  	  	 
+  	  	 

@@ -1,0 +1,66 @@
+Fake Identity Generator
+Copyright (C) 2011-2016 Hibbard M. Engler (Bitcoin address 1ERDHsxtekdh5FAsxdb92PBFK7nnuwMkbp for gifts)
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+<hr>
+
+
+Version 1.0
+<h1>Introduction</h1>
+
+<h1>General</h1>
+There are two ways to program computers, one way is to write one's own code, and the other way is to 
+integrate with pre-written code.  For this project,  I bended towards the former.
+<p>
+Some of the tools work well for general purpose processing of data,  especially when the data is relativily static.
+<p>
+<h2>Hardware</h2>
+The hardware used started out as an 1999 dell laptop with a pentium 3 processor 2gb ram.  I quickly progressed to using a 2009 Macbook
+pro with a SSD, and 8GB ram.  Then I briefly tried an HP store-variety desktop with 8GB ram running linux.
+Finally I used a home built a 6 core AMD machine with 4 2tb hard drives in a raid-0, 16GB ram.
+32GB would have halved the time to process, as many of the early stages could completely be cached in ram.
+<p>
+<h2>Database selection:</h2>
+When first starting,  I used the Oracle Database to record the information.  Unfortunately,  I found
+Oracle to be way too slow to process the large amount of information.  So I then switched to mysql, primarily
+using the ISAM enging.   This was 10 times faster than Oracle on my system - quite impressive.  But
+it was too slow also.  In order to do the processing,  I wrote customized tools using direct file access,
+usually via memory mapping.  I found that this brought the fastest and most convienent processing possuble.
+Because of the large size, and because memory mapping is used,  this has to be on a 64 bit machine.  But older sempirons can run it.
+<h2>Computer Language</h2>
+The computer language primarily used is C,  with perl in some parts for good measure, and snobol as well.
+Perl is easy to put things together to process stuff.  But although it is fast enough for usual file processing,  it is 
+real slow compared to native C.  So I progressed to placing more and more tools in C.
+Some of these tools,  - the generic processing ones - will probably be released as GPL.  I just need a good name for them.
+<h2>File Format</h2>
+<p>
+The files are basically comma separated value files,   using the verticall bar (|) as the comma.
+No work was done to escape the vertical bar in the data file.  So there is not record that has 
+a vertical bar as part of the data.  This is similar to how the NUL character is processed on 
+c based strings; it is removed from the data set.  Information is assumed to be in the Ascii character set,  a 
+small subset of UTF-8, and WE8ISO8559-P1, which works fine for the given subject matter - the USA.
+<p>
+Files are either sorted,   are arranged in a hash table,  or are marked by a perfect hash table,
+which speeds things up immensely.  The language of sorting is C - 
+so there is no need for translation.
+Sorting allows binary search to be used,  and range search is also possible.  Hash tables allows order(1)
+for the search,  but is much more of a memory hog.
+<p>
+<h2>Process</h2>
+The data is processed as an assembly line,  with 15 main waypoints on the conveyor belt.
+Each section has it's own makefile which processes values.  
+<p>
+
+<a href=02_obtaining.html>Obtaining the source data</a>

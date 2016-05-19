@@ -1,0 +1,121 @@
+http://www.usps.com/ncsc/lookups/usps_abbreviations.html
+states/ street types
+
+
+
+http://www.whitepages.com/search/FindPerson?firstname_begins_with=1&firstname=&name=Engler&where=54901
+Given a zip code and a last name, we can get data.
+
+26000 cities, each with 18763 last names
+487 million requests.  Not so bad.
+
+http://www.semaphorecorp.com/cgi/address.html
+ZIP4 CASS database (ordered)
+
+Note - zip != state in all cases.
+ZIP4 - can dump to our database :)
+Have to be careful about publishing these addresses.
+Only use addresses that are listed.
+
+Reverse address lookup -- 
+http://www.semaphorecorp.com/cgi/address.html
+
+Thats better.  149 million reverse address lookups!
+
+But we can use names to search as well - common names maybee?
+Oh christ 
+http://www.whitepages.com/search/ReverseAddress?street=pearl+avenue&where=Loves+Park%2C+IL
+
+Gives you everybody on that fucking street!
+So zip+4 gets names!
+
+
+http://www.semaphorecorp.com/home/free.html
+has gender tagger - could be useful
+Also, name parsing
+
+Mellissa data - limits to 20 queries a day :(   good data though :)
+
+
+
+http://ssdi.rootsweb.ancestry.com/cgi-bin/ssdi.cgi?lastname=Engler&start=2441
+Get dead people based on last names.
+
+
+
+To get cty area codes:
+http://www.nanpa.com/nas/public/npa_city_query_step2.do?method=displayData
+
+
+
+To get prefix numbers:
+http://www.phoneinformant.com/920/
+For the 920 area code
+
+There 
+
+
+Drivers licenses:
+http://www.highprogrammer.com/cgi-bin/
+Florida, Illinois, Wisconsin, Maryland, Michigan, Minnesoda pre 2005, New Hampshire,
+New York (pre-1992)
+Washington, Wisconsin,
+
+
+Passports:
+http://www.highprogrammer.com/cgi-bin/uniqueid/mrzp
+
+
+Phone numbers in use:
+http://www.numberinvestigator.com/920233 - 9900 every time
+or
+http://www.directoryofphonenumbers.com/920-233
+or
+http://www.infoup.com/suffix/920-233.html
+or
+http://www.areacodedownload.com/334/504/index.html - gives 
+county population and lat and long
+
+Fake nbame generator
+http://www.fakenamegenerator.com/
+Free tools.
+
+Neighboring cities:
+http://www.numberinvestigator.com/920233 - just choose a city.
+
+
+
+
+
+List of directors:
+http://en.wikipedia.org/wiki/List_of_directors
+
+List of actors/actresses:
+http://en.wikipedia.org/wiki/Lists_of_actors - american not there
+http://www.ducksoftware.com/movies/actorsac.html
+
+List of file producers:
+http://en.wikipedia.org/wiki/List_of_film_producers
+TV
+http://en.wikipedia.org/wiki/List_of_television_producers
+
+List of politicians:
+http://greenfield.fortunecity.com/swallowtail/408/addresses4.htm lame
+
+List of politicians
+http://www.conservativeusa.org/mega-cong.htm
+
+Richest:
+http://www.forbes.com/lists/2009/54/rich-list-09_The-400-Richest-Americans_NameProper.html
+http://www.forbes.com/lists/2009/54/rich-list-09_The-400-Richest-Americans_NameProper_2.html
+... 16
+
+musicians:
+http://musiced.about.com/od/famousmusicians1/a/greatcomposers.htm
+
+
+
+
+
+http://whattheinternetknowsaboutyou.com
+

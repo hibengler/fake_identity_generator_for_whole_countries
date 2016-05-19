@@ -1,0 +1,134 @@
+Fake Identity Generator
+Copyright (C) 2011-2016 Hibbard M. Engler (Bitcoin address 1ERDHsxtekdh5FAsxdb92PBFK7nnuwMkbp for gifts)
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+
+
+Technical notes.
+
+Overview.
+
+The idea was to make a complete set of consistent fake identities for the entire US.
+
+
+Database selection.
+I started to use Oracle for the process,  but it proved to be too slow.  Later I went to MySql,  which was 10 times faster,  but also too slow.
+
+So in the end I wrote my own tools based on binary searches and sorting of text files, with the big data chink streaming through like an old 
+school tape file.
+
+
+Hardware
+
+The prototypes were build using a dual core intel on OS-X powerbook with a ssd hard disk, and external disks added.
+But the final build machine was an AMD 6 core with 16 gb ram, and 4 2TB drives in a raid-0 configuration.   This machine had sustained 
+sequential read and write speeds of 450 mb/sec,  and had pretty decent random IO as well.
+
+The main server is a 6 core AMD (only would need a 1 core actually)  with 4 GB of ram under ubuntu linux, with 3 1TB sata hard disks storing 
+3 copies of the data.
+
+
+
+Software
+Most of the software is written in C,  with some perl, awk, shell scripting, and a little bit of SNOBOL in there.  make is used to perform 
+the processing of each stage.  There are 14 stages from inception to fruition with several extra prepatory steps inbetween.
+
+
+
+Start
+There are terms of use restrictions on lists of data.  These are generally in place to protect companie's assets, as factual lists of data
+cannot be protected under copyright.  In some cases, the terms of use exists in order to prevent abuse.
+
+Addresses of the entire nation are available in the ZIP+4 database,  which is available from vaious sources.  However, the data can only
+be used to clean up addresses collected by another mean.  Generating lists is strictly forbidden.  So I never used this data.
+
+Social Security Death Index has other restrictions as well.  I ended up extracting the data via legal means,  but could not use the data
+in my system.  However I used the ABSENCE of the data,  limiting SSN's to those who would not be dead,  and that should be acceptable 
+in terms of the law.
+
+Mailing lists are for sale, and are designed to be rented for a single use of mass mailings.  These are broken down by various means,  
+and have some watermarked addresses to ensure that the lists are only used once.   A nationwide list of the mailing would cost $50,000 - way
+too much for this project.
+
+So, the main set of data was a uncleaned set of contacts from CFM Data Leads.  On gathering this data, I also got explicit rights to publish 
+the fake data from CFM,  as their terms of use out the box do not allow for republishing.
+
+
+
+
+ha_clean_city leads.txt -> l001.txt -> l002.txt -> l003.txt
+
+l001.txt:
+The data comes as tab separated value text, has phone number, name, age demographic, address, zipcode, latitude, longitude, county.  
+Since this was not cleaned to have phone numbers in every case,  the phone number is optional.
+
+The parsing of the names is tricky,  as sometimes there are multiple names on one page.  Sometimes, the middle name is listed, sometimes not.
+It took considerable logic to figure this out.
+
+The parsing of the address is tricky as well.  There are rural routes, po boxes, there are types of streets in the standard format 
+(Washington Street) and in the Spanish/French format (Via Trunda).  The street numbers and apartment numbers could contain letters as well.
+It also took considerable logic to figure this out.
+
+The parsing is done with a 526 line snobol program,  which is probably equivilant to a 5000 line c program.  Snobol has the best ability to
+handle such data, hands down.  However it is interpreted and slow,  able to do about 10,000 lines a second on a single process.
+
+I wrote a program called flip_flop to split the job into 6 jobs, one per processor.  The splitting is done one per line. After which the results were
+combined together.  flip_flop can actually split to an arbitrary number of jobs.  Named pipes were also used to limit the need for temporary files.
+
+The output of leads.txt is l001.txt,  a vertical bar separated ascii text file.  The format of these fields is listed in l.format.  
+This file is augmented over time to l002, l003, etc, for each step of the processing.
+
+
+l002.txt:
+name.sno does have a few errors in parsing.  But they are inconsequential.  l002.txt has the errors generated filtered out from l001.txt
+
+
+l003.txt:
+We need to know the area codes for all users.  This is important for filtering later.  This can be estimated by looking at the area codes
+by zip code, and their count, randomly pic a number in that count and choose the area code of the zipcode.  This concept is the main 
+part of how most of ths system works, and to talk about it,  we need to start off with the initial programs.
+
+As everything is vertical bar separated,  there is a need to split out a subset of fields for working.  Initially this was done with an 
+awk program such as:
+
+awk <../common/l002.txt -F \| '{ print $4 "|" $5 "|" $8 }'
+
+The program is simple to understand,  but slow in it's throughput, as awk is an interpreted language.  Considerable speed increase was
+caused by making a program called "field" in c which does the same thing:
+
+field <../common/l002.txt 4 5 8
+
+Although a select statement in the SQL programming language is much more informative as to the meaning,  the field numbers as defined in l.format
+are pretty easy to understand.   Note thet the field command starts with field 1,  whereas in the c code, the field() function starts with 0.
+This is why both index forms are listed in l.format.
+
+Then there was a need to get a unique set of fields.
+
+
+
+
+
+
+
+
+For starters, we need a list in acs_per_zip.txt
+
+make_ac is a customized program that 
+
+
+
+
+

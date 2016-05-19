@@ -1,0 +1,12 @@
+This was made in order to create fake sets of realistic information to be used for testing of systems, for demonstration purposes, 
+and for honeypots in order to help companies avoid leaking real information out.
+
+Later on, xdd, and ht like were released with the intent to protect people's real identity, by making it less likely
+that one's real information is blatantly on the internet.
+
+Before the fake names, there were two possibilities on ones identity, either it was not on search engines, or it was.  This is the thired option.
+
+
+This is free software.  If you find this useful, donations to me, or the Engler Insitute can be sent to this bitcoin address:
+
+1ERDHsxtekdh5FAsxdb92PBFK7nnuwMkbp

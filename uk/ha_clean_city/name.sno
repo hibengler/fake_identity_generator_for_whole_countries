@@ -1,0 +1,744 @@
+#
+# Fake Identity Generator
+# Copyright (C) 2011-2016 Hibbard M. Engler (Bitcoin address 1ERDHsxtekdh5FAsxdb92PBFK7nnuwMkbp for gifts)
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+* Based on V1.6 of the us parser
+* UK is dofferent because of the followint:
+* 1 - less data is available - we do not have any deomgraphics for example
+* 2 - the name is sometimes first last and domsetimes last first
+* More names have initials
+* phone numbers are many gigits followed by many other digits
+* city might have 3 "groups"
+* zip code is alphanumeric
+	
+	s = '|'
+	q = '	'
+	quote = char(39)
+	
+	define('cleanup_text(s)',a)
+	define('work(y)savea,saveb,savec')
+	
+	define('cleanup_phone(p)')
+	
+	
+	allstuff = &alphabet
+	allstuff q = ''
+	
+* This is for the cities
+	all_no_comma_stuff = allstuff
+	all_no_comma_stuff ',' = ''
+	
+	rall = arbno(any(allstuff))
+	all = span(allstuff)
+	all_no_comma = span(all_no_comma_stuff)
+	rall_no_comma = arbno(any(all_no_comma_stuff))
+	
+	namestuffa = allstuff
+	namestuffa ' ' = ''
+
+        
+
+	worda = span(namestuffa)
+	
+	namestuff = namestuffa
+	namestuff '&' = ''
+	namestuff '/' = ''
+	
+	word = span(namestuff)
+	init_pat = ( any(namestuff) any(namestuff) ) | any(namestuff)
+	
+	numbers = '0123456789'
+
+	middle_name = any(namestuff) any(namestuff) word
+	
+	define('isnotasuffix(s)')
+	
+* our base data was lname fname middle
+* but the lead data is fname minitial lname (sr/jr)	
+
+	prefix_male = 'mr'
+	prefix_female = 'mrs' | 'ms' | 'miss'
+	prefix = ( prefix_male | prefix_female ) . theprefix
+	
+	suffix = 'jr' | 'sr' | 'ii' | 'i' | 'iii' | 'v' | 'iv' | 'vi' | 'vii' | 'viii' | 'ix' | 'x'
+	suffix_clause = ( ' ' suffix . thesuffix ) 
+	alt_suffix_clause = ( ' ' suffix . thealtsuffix ) 
+
+	vonvan = ( ( 'O' | 'o' ) | '') ( 'del' | 'mac' | 'mc' | 'van' | 'von' | 'vanden' | 'van den' | 'van de' | 'de la' 
++                | 'de' | ( 'dato' quote ) ) ' ' word | word
+	
+	and_or_or = ' and ' | ' or ' | ' & ' | ' &' | '&' | ' / ' | '/'
+	andname1 = ( prefix | '') word . fname and_or_or ( prefix | '') word . fname2 
+	andname2 = ( prefix | '') ( word ' ' middle_name ) . fname and_or_or ( prefix | '') word . fname2 
+	andname3 = ( prefix | '') ( word ' ' init_pat ) . fname and_or_or ( prefix | '') ( word ' ' init_pat ) . fname2
+	andname3a = ( prefix | '') ( init_pat ( ' ' | '.' ) init_pat ) . fname and_or_or ( prefix | '') ( init_pat ( ' ' | '.' ) init_pat ) . fname2
+	andname3b = ( prefix | '') ( init_pat ( ' ' | '.' ) init_pat ) . fname and_or_or ( prefix | '') ( init_pat ) . fname2
+	andname3c = ( prefix | '') ( init_pat ) . fname and_or_or ( prefix | '') ( init_pat ( ' ' | '.' ) init_pat ) . fname2
+	andname3d = ( prefix | '') ( init_pat ) . fname and_or_or ( prefix | '') ( init_pat ) . fname2
+	andname4 = ( prefix | '') ( word ' ' init_pat ) . fname ' ' ( prefix | '') ( word ' ' init_pat ) . fname2
+	andnamea = ( andname1 | andname2 | andname3 | andname3a | andname3b | andname3c | andname3d | andname4 ) . the_andname ( ' ' vonvan . lname 
++                  ( suffix_clause | '' ) ) . andrest
+	andnameb = (  word . fname ' ' init_pat ' ' vonvan suffix_clause )  . the_andname
++                  (  ' ' word . fname2 ' ' init_pat ' ' vonvan suffix_clause ) . therest
+	andname = andnamea | andnameb
+	
+	name1 = vonvan . lname
+	name2 = prefix ' ' init_pat . fname ' ' vonvan . lname
+	name3 = prefix ' ' init_pat . fname ( '.' | ' ' ) init_pat . minit '.' ' ' vonvan . lname
+	name4 = prefix ' ' init_pat . fname ( '.' | ' ' ) init_pat . minit ' ' vonvan . lname
+	name5 = prefix ' ' init_pat . fname ' ' word . mname ' ' vonvan . lname
+	name6 = prefix ' ' word . fname ' ' word . mname ' ' vonvan . lname
+	name7 = prefix ' ' word . fname ' ' vonvan . lname
+	name8 = init_pat . fname ' ' vonvan . lname
+	name9 = init_pat . fname ( '.' | ' ' ) init_pat . minit '.' ' ' vonvan . lname
+	name10 = init_pat . fname ( '.' | ' ' ) init_pat . minit ' ' vonvan . lname
+	name11 = init_pat . fname ' ' word . mname ' ' vonvan . lname
+	name12 = vonvan . lname ' ' word . fname ' ' init_pat . minit
+	name13 = vonvan . lname ' ' word . fname  ' ' init_pat . minit
+	name14 = vonvan . lname ' ' word . fname  ' ' word . mname
+	name15 = vonvan . lname ' ' word . fname  ' ' ( word ' ' word ) . mname
+	name16 = vonvan . lname ' ' word . fname
+	name17 = vonvan . lname ' ' init_pat . mname
+
+	nname = ( name1 | name2 | name3 | name4 | name5  | name6 | name7 | name8 | name9 | name10 | name11
++		 | andname | 
++		  name12 | name13 | name14 | name15 | name16 | name17	  
++	  ) 
+
+	name =  (nname suffix_clause) . thename | (nname) . thename
+
+
+
+	
+		
+*	altname is the alternate name deal that was the original name
+*       because in hte UK, some of the names are fname lname, etc.
+*       and some are lname fname mid
+* so we need to do both versions, and then statistically see which one 
+* LOOKS like a proper name based on the us set of data.
+*			
+	middle_altname = any(namestuff) any(namestuff) word
+	
+	andaltname1 = word . faltname and_or_or word . faltname2 
+	andaltname2 = ( word ' ' middle_altname ) . faltname and_or_or word . faltname2 
+	andaltname3 = ( word ' ' init_pat ) . faltname and_or_or ( word ' ' init_pat ) . faltname2
+	andaltname4 = ( word ' ' init_pat ) . faltname ' ' ( word ' ' init_pat ) . faltname2
+	andaltnamea = ( andaltname1 | andaltname2 | andaltname3 | andaltname4 ) . the_andaltname ( ' ' vonvan . laltname 
++                  ( suffix_clause | '' ) ) . andrest
+	andaltnameb = (  word . faltname ' ' init_pat ' ' vonvan suffix_clause )  . the_andaltname
++                  (  ' ' word . faltname2 ' ' init_pat ' ' vonvan suffix_clause ) . therest
+	andaltname = andaltnamea | andaltnameb
+	
+	altname1 = vonvan . laltname
+	altname2 = word . faltname ' ' vonvan . laltname
+	altname3 = word . faltname ' ' init_pat . maltinit ' ' vonvan . laltname
+	altname4 = word . faltname ' ' middle_altname . maltname ' ' vonvan . laltname
+	altname5 = ( init_pat ' ' word ) . faltname ' ' init_pat . maltinit ' ' vonvan . laltname
+	altname5a = word . faltname ' ' word . maltinit ' ' ( ( 'O' | 'o' ) ' ' vonvan )  . laltname
+	altname5b = word . faltname ' ' ( word ' ' any(namestuff) ) . maltinit ' ' vonvan  . laltname
+	altname6 = word . faltname ' ' init_pat . maltinit ' ' ( vonvan  ' ' word ) . laltname
+* note - altname13 is special - it could mean faltname maltname maltinit laltname
+	altname13 = ( word ' ' middle_altname ) . faltname ' ' init_pat . maltinit  ' ' vonvan . laltname 
+* note - altname14 is also special - it could mean faltname maltinit maltname laltname
+	altname14 = ( word ' ' init_pat ) . faltname ' ' middle_altname . maltname  ' ' vonvan . laltname 	
+	altname7 = word . faltname ' ' ( middle_altname ' ' word ) . maltname ' ' vonvan . laltname
+	altname8 = word . faltname ' ' ( word ' ' word ' ' word ) . maltname ' ' vonvan . laltname
+	altname9 = word . faltname ' ' ( word ' ' word ' ' word ) . maltname ' ' vonvan . laltname
+	altname10 = word . faltname ' ' ( word ' ' word ' ' word ' ' word ) . maltname ' ' vonvan . laltname
+	altname11 = word . faltname ' ' ( word ' ' word ' ' word ' ' word ) . maltname ' ' vonvan . laltname
+	altname12 = word . faltname ' ' ( rall ) . maltname ' ' vonvan . laltname
+	naltname = ( altname1 | altname2 | altname3 | altname4 | andaltname | altname5 | altname5a | altname5b | altname6 | altname13 | altname14 | 
++	 altname7 | altname8 | altname9 | altname10 | altname11 | altname12  ) 
+	altname =  (naltname suffix_clause) . thealtname | (naltname) . thealtname
+					
+
+	
+	
+	
+	
+	
+	oto9 = '0123456789'
+	abc = 'abcdefghijklmnopqrstuvwxyz'
+	abc2 = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+	
+	
+	fraction = '1/2' | '3/4' | '1/3' | '2/3' | '1/4'
+	
+	
+	numbersonly = any(oto9) arbno(any(numbers))
+	numbersuffix = span(numbers)
+	lettersonly = span(abc)
+	numbersorletters = numbersonly | lettersonly
+	arbnumbersorletters = span( numbers abc )
+	numbersuffix_orletters = numbersuffix | lettersonly
+	na1 = arbnumbersorletters '-' arbnumbersorletters
+	na2 = numbersonly lettersonly numbersuffix
+	na3 = numbersonly lettersonly
+	na4 = lettersonly numbersuffix
+	na5 = numbersonly lettersonly
+	na6 = numbersonly
+	na7 = any(abc) any(abc) | any(abc) 
+	na8 = lettersonly numbersuffix lettersonly
+	na9 = arbnumbersorletters '-' arbnumbersorletters '-' arbnumbersorletters
+	na10 = ( numbersonly ' ' fraction ) | fraction
+	na11 = lettersonly numbersonly lettersonly numbersonly
+	na12 = lettersonly numbersonly lettersonly numbersonly lettersonly
+	na00 = 'wildlif' | 'none' 
+	numberalpha = na1 | na2 | na3 | na4 | na5 | na6 | na7 | na8 | na9 | na10 | na11 | na12 | na00
+
+
+	alphaspecial = any(abc) any(abc) any(abc) 
++	|	any(abc) any(abc) 
++			| any(abc)
+	
+	alone_subdivision_type = 'bsmt' | 'uppr' | 'lowr' | 'ext'
+	subdivision_type = 'box' | 'apt' | '#' | 'ste' | 'lot' | 'unit' | 'spc' | 'rm' | 'trlr' | 'rear' | 'stop' | 'ofc' | 
++     'bldg' | 'fl' | 'ph' | 'bsmt' | 'slip' | 'lbby' | 'frnt'
+	subdivision_number = numberalpha | alphaspecial
+	subdivision_clause1 = ' ' subdivision_type . thesubdivision_type ' ' subdivision_number . thesubdivision_number
+	subdivision_clause2 = ' ' alone_subdivision_type . thesubdivision_type
+	subdivision_clause3 = ' ' '#' . thesubdivision_type subdivision_number . thesubdivision_number
+	subdivision_clause4 = ' ' '#' . thesubdivision_type ' ' lettersonly . thesubdivision_number
+	subdivision_clause = ( subdivision_clause1 | subdivision_clause2 | subdivision_clause3 | subdivision_clause4 | '' )
+
+	street_number = numberalpha	
+	street_type = ' ' ( 'st' | 'ave' | 'dl' | 'way' | 'dr' | 'rd' | 'pl' | 'ln' | 'cir'  | 'ter' | 'expy' | 'turnabout' |
++                      'blvd' | 'ct' | 'cv' | 'loop' | 'trl' | 'curv' | 'pkwy' | 'belle' | 'trove ' | 'lndg' | 'bnd' | 'mews' |
++                      'park' | 'holw' | 'point' | 'cir' | 'hwy' | 'spur' | 'aly' | 'run' | 'path' | 'row'
++                      | 'turnaround' | 'byp' | 'run' | 'est' | 'hl' | 'plz' | 'cor' ) . thestreet_type | ''
+
+	spanish_street_type = 'via' | 'alameda de' | 'rue de la' | 'rue' | 'avenue' | 'us highway' | 'county road' | 'road' | 'highway' |
++	'interstate' | 'county highway' | 'state highway' | 'placita' | 'ave de la'
+
+	direction =  ( 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw' ) . thestreet_direction ' ' | ''
+	direction2 = ' ' ( 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw' ) . thestreet_direction2 | ''
+	
+	address_chunk1 = ( worda ' ' worda ' ' worda ' ' worda ' ' worda )
+	address_chunk2 = ( worda ' ' worda ' ' worda ' ' worda )
+	address_chunk3 = ( worda ' ' worda ' ' worda )
+	address_chunk4 = ( worda ' ' worda )
+	address_chunk5 = ( worda )
+	address_chunk = ( address_chunk5 | address_chunk4 | address_chunk3 | address_chunk2 | 
++                        address_chunk1 ) . thestreet_name
+	
+	street_name_with_direction = ( direction address_chunk ) 
+
+	
+	address_rest1 = direction address_chunk street_type direction2 subdivision_clause
+* above lets anything through.
+	address_rest = address_rest1
+
+	regular_address = street_number . thenumber ' ' address_rest
+	
+	nostreetnumber_address =  address_rest
+	
+	spanish_address = street_number . thenumber ' ' spanish_street_type . thespanish_street_type ' ' address_chunk subdivision_clause
+	
+	pobox_address = ( 'po' | 'psc' ) subdivision_clause1
+
+	rural_route_indicator = ( 'rr' | 'hc' | 'hcr' | 'hcl' | 'psc' )
+
+
+	rural_route_address = ( rural_route_indicator ' ' numbersonly ) . thestreet_name subdivision_clause  | rrx
+
+	:(address_exceptions)
+done_address_exceptions
+	
+	address = ( regular_address | pobox_address | rural_route_address | spanish_address | nostreetnumber_address | 
++	  address_exception ) . theaddress
+
+	
+	
+	
+	city = all . thecity
+	state = worda . thestate
+	numbers2 = any(numbers) any(numbers)
+	numbers3 = any(numbers) any(numbers) any(numbers)
+	numbers4 = any(numbers) any(numbers) any(numbers) any(numbers)
+	numbers5 = any(numbers) any(numbers) any(numbers) any(numbers) any(numbers)
+	numbers6 = any(numbers) any(numbers) any(numbers) any(numbers) any(numbers) any(numbers)
+	numbers7 = any(numbers) any(numbers) any(numbers) any(numbers) any(numbers) any(numbers) any(numbers)
+	numbers8 = any(numbers) any(numbers) any(numbers) any(numbers) any(numbers) any(numbers) any(numbers) any(numbers)
+	numsorletters2 = oto9 abc
+	zip = ( any(numsorletters2) arbno(any(numsorletters2)) ) . thezip ( any(oto9) any(abc) any(abc) ) . theplus4
+	
+	
+	phonesep = 'cell' | 'fax' | 'freecell' | 'freecall'
+
+	phone1 = ( '.' | '' ) span(numbers) . thearea_code '.' '' . theexchange span(numbers) . therest
+	phone2 = ( '.' | '' ) span(numbers)
+	phone = phone1 | phone2
+	phones = ( ( ( phonesep ':') | '' ) phone . thephone ',.' phonesep ':' phone . thephone2 ) | ( ( ( phonesep ':') | '' ) phone . thephone ) | ''
+	
+	
+	five_digit_area_codes = '013873' | '015242' | '015394' | '015395' | '015396' | '016973' | '016974' | '016977' | '017683' | '017684'
++                               | '017687' | '019467'
+
+	phone_five_digit = five_digit_area_codes . thearea_code '' . theexchange span(numbers) . therest
+	phone_four_digit = ( '01' numbers3 ) . thearea_code '' . theexchange span(numbers) . therest
+        phone_three_digit = ( ( '011' any(numbers) ) | ( '01' any(numbers) '1' ) ) . thearea_code '' . theexchange span(numbers) . therest
+	phone_two_digit = ( '02' any(numbers) ) . thearea_code '' . theexchange span(numbers) . therest
+	phone_mobile = ( '07' numbers3 ) . thearea_code '' . theexchange span(numbers) . therest
+	phone_mann = ( '07624 ' ) . thearea_code '' . theexchange span(numbers) . therest    
+	phone_pager = ( '070' | '076' ) . thearea_code '' . theexchange span(numbers) . therest
+	phone_non_geo = ( '03' number2 ) . thearea_code '' . theexchange span(numbers) . therest
+	phone_freephone = ( '0500' | '0800' | '0808' ) . thearea_code '' . theexchange span(numbers) . therest
+	phone_corporate = ( '05' any(numbers) ) . thearea_code '' . theexchange span(numbers) . therest
+        phone_eights = ( '08' number2 )  . thearea_code '' . theexchange span(numbers) . therest
+	phone_nines = ( '09' number2 ) . thearea_code '' . theexchange span(numbers) . therest
+		
+	
+	
+	fixphone = phone_five_digit | phone_three_digit | phone_four_digit | phone_two_digit | phone_mann | phone_pager | phone_mobile |
++		phone_non_geo | phone_freephone | phone_corporate | phone_eights | phone_nines 
+	
+	
+	age = all . theage
+	congress = ( all | '' ) . thecongress
+	county = ( all | '' ) . thecounty
+	dpv = ( all | '' ) . thedpv
+	gender = ( ( 'm' | 'f' ) . thegender | 'u' )
+	
+	decimal = span(numbers) '.' span(numbers)
+	latitude = ( decimal | '' ) . thelatitude
+	longitude = ( decimal | '' ) . thelongitude
+	type = ( all | '' ) . thetype
+		
+
+
+* This was us			
+*	valid_line = address q age q city q congress q county q dpv q gender q name q latitude q longitude
+* +             q phone q state q type q zip
+	valid_line = name q phones q address q city q zip
+										
+	DEFINE('lower(s)')
+        UP_LO  =  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+        LO_UP  =  'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz'
+                                                :(UPLO_END)
+lower    lower   =  REPLACE(S, UP_LO, LO_UP)      :(RETURN)
+UPLO_END
+
+
+
+	DEFINE('upper(s)')
+        xUP_LO  =  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+        xLO_UP  =  'ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ'
+                                                :(xUPLO_END)
+upper	upper   =  REPLACE(S, xUP_LO, xLO_UP)      :(RETURN)
+xUPLO_END
+
+	DEFINE('initcap(s)a,b,c,b2,r2')
+                                                :(yUPLO_END)
+initcap	a = s
+	b = ''
+	c = ''
+	&anchor = 1
+initcapl
+	a arbno(any(&alphabet)) . r2 ( any(UP_LO) . b worda . b2 | any(UP_LO) . b '' . b2 ) = ''			:s(initcaps)
+	c = c a
+	initcap = c
+	:(RETURN)
+initcaps
+	c = c r2 upper(b) lower(b2)
+	:(initcapl)
+yUPLO_END
+
+
+
+
+
+
+
+
+
+*   main!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+main
+
+
+	
+	table_num = host(2,7)
+	
+	current_table_number = 0
+	&anchor = 1
+loop	y = input	:f(endd)
+	&anchor = 0
+lll	y s = '!'	:s(lll)
+	y char(13) rpos(0) = ''
+	&anchor = 1
+	
+*       skip blank
+	y '' rpos(0)	:s(loop)    
+	work(y)
+	:(loop)
+	
+	
+work	
+	x = lower(y)
+	x rall . bn q rall . bphone q rall . baddress q rall . bcity q rall . bzip rpos(0) :f(ohwell)
+
+* fix names with ' - ' to be '-'
+	&anchor = 0
+loopcleandash
+	bn ' - ' = '-'	:s(loopcleandash)
+loopcleanslash
+	bn '/' = '&' :s(loopcleanslash)
+loopcleanphone
+	bphone ' ' = '' :s(loopcleanphone)
+loopcleanzip
+	bzip ' ' = '' :s(loopcleanzip)
+	
+	x = bn q bphone q baddress q bcity q bzip
+	&anchor = 1
+
+	:(ohwell)
+
+	
+	
+ohwell
+
+* make sure everything is cleared
+	'clear' '' . lname '' . fname '' . minit '' . mname '' . theaddress '' . thenumber '' . thename
+	'clear' '' . thestreet_direction '' . thestreet_name '' .  thestreet_type '' . thesubdivision_type '' . thesubdivision_number
+	'clear' '' . thecity '' . thestate '' . thezip '' . thearea_code '' . theexchange '' . therest
+	'clear' '' . thesuffix '' . theplus4 '' . theage '' . thecongress '' . thecounty '' . thedpv '' . thegender 
+	'clear' '' . thelatitude '' . thelongitude '' . thetype '' . thestreet_direction2 '' . thespanish_street_type '' . the_andname
+	'clear' '' . thephone '' . thephone2 '' . theprefix
+	'cleae' '' . laltname '' . faltname '' . maltinit '' . maltname '' . maltsuffix
+
+	
+	x valid_line	:f(badline)
+	
+	
+	the_andname '' rpos(0)	:s(chk0)
+* rebuild the string twice, and call work twice to do one for each name
+	x '' . savea  rall 
++         ( q rall q rall q rall q  rall rpos(0) ) . saveb
+	savec = savea fname  andrest saveb
+	saveb = savea fname2 andrest saveb
+	work(savec)
+	work(saveb)
+	:(return)
+		 	
+chk0
+	x altname q
+
+	
+chk1a
+	lname = initcap(lname)
+	fname = initcap(fname)
+*       Set minit to the first character of mname of mname is filled in and minit is not
+	mname '' rpos(0)	:f(chk2)
+	minit '' rpos(0)	:f(chk2)
+	minit = substr(mname,1,1)
+chk2
+	minit = upper(minit)
+	mname = initcap(mname)
+	
+	laltname = initcap(laltname)
+	faltname = initcap(faltname)
+*       Set maltinit to the first character of maltname of maltname is filled in and maltinit is not
+	maltname '' rpos(0)	:f(chk2alt)
+	maltinit '' rpos(0)	:f(chk2alt)
+	maltinit = substr(maltname,1,1)
+chk2alt
+	maltinit = upper(maltinit)
+	maltname = initcap(maltname)
+
+
+* new code SOMETHING.something in fname -> something in fname and something in mname - if no mname
+* otherside something something in fame
+	faltname span(abc2) . fpart1 '.' span(abc2) . fpart2	:f(nevahmindalt)
+	maltinit '' rpos(0) :s(nominitxalt)
+	faltname = fpart1 ' ' fpart2	:(nevahmindalt)
+nominitxalt
+	maltinit = substr(maltname,1,1)
+	maltname = fpart2
+	faltname = fpart1
+		
+nevahmindalt
+
+
+* ALTERNATE new code SOMETHING.something in fname -> something in fname and something in mname - if no mname
+* otherside something something in fame
+	fname span(abc2) . fpart1 '.' span(abc2) . fpart2	:f(nevahmind)
+	minit '' rpos(0) :s(nominitx)
+	fname = fpart1 ' ' fpart2	:(nevahmind)
+nominitx
+	minit = substr(mname,1,1)
+	mname = fpart2
+	fname = fpart1
+		
+nevahmind
+	
+
+		
+		
+	
+* new code to get rid of the . in first name, middle name, etc.
+	&anchor = 0
+dotremove1
+	fname '.' = ''	:s(dotremove1)
+dotremove2
+	mname '.' = ''	:s(dotremove2)
+dotremove3
+	lname '.' = ''	:s(dotremove3)
+dotremove4
+	laltname '.' = ''	:s(dotremove4)
+dotremove5
+	maltname '.' = ''	:s(dotremove5)
+dotremove6
+	faltname '.' = ''	:s(dotremove6)
+	&anchor = 1
+
+	thenumber = upper(thenumber)
+	thestreet_direction = upper(thestreet_direction)
+	thestreet_name = initcap(thestreet_name)
+	thestreet_type = initcap(thestreet_type)
+	thestreet_direction2 = upper(thestreet_direction2)
+	thespanish_street_type = initcap(thespanish_street_type)
+	thesubdivision_type = initcap(thesubdivision_type)
+	thesubdivision_number = upper(thesubdivision_number)
+*	theage = initcap(theage)
+*	thecongress = initcap(thecongress)
+*	thecounty = initcap(thecounty)
+*	thedpv = upper(thedpv)
+*	thetype = upper(thetype)
+*  you would think we can do 	theaddress = initcap(theaddress)
+
+* in actuality, we should rebuild theaddress with all the constituents
+	comma = ''
+	theaddress = ''
+	thenumber '' rpos(0) :s(qq1)
+	theaddress = theaddress comma thenumber
+	comma = ' '
+qq1
+	thestreet_direction '' rpos(0) :s(qq2)
+	theaddress = theaddress comma thestreet_direction
+	comma = ' '
+qq2
+	thespanish_street_type '' rpos(0) :s(qq2a)
+	theaddress = theaddress comma thespanish_street_type
+	comma = ' '
+qq2a	
+	thestreet_name '' rpos(0) :s(qq3)
+	theaddress = theaddress comma thestreet_name
+	comma = ' '
+qq3
+	thestreet_type '' rpos(0) :s(qq4)
+	theaddress = theaddress comma thestreet_type
+	comma = ' '
+qq4
+	thestreet_direction2 '' rpos(0) :s(qq4a)
+	theaddress = theaddress comma thestreet_direction2
+	comma = ' '
+qq4a
+	thesubdivision_type '' rpos(0) :s(qq5)
+	theaddress = theaddress comma thesubdivision_type
+	comma = ' '
+qq5
+	thesubdivision_number '' rpos(0) :s(qq6)
+	theaddress = theaddress comma thesubdivision_number
+	comma = ' '
+qq6
+		
+	
+	thecity = initcap(thecity)
+	thestate = upper(thestate)
+	therest = initcap(therest)
+	thesuffix = initcap(thesuffix)
+	thezip = upper(thezip)
+	theplus4 = upper(theplus4)
+
+* convert prefix to male or female
+	theprefix '' rpos(0) :s(noprefixfound)
+	theprefix prefix_male	:s(malefound)
+femalefound
+	thegender = 'F' :(prefixdone)	
+
+malefound
+	thegender = 'M' :(prefixdone)
+	
+prefixdone
+	
+		
+noprefixfound	
+		
+				
+* handle two phones 
+	thephone2 ''	:s(onlyonephone)
+	
+	cleanup_phone(thephone)	:f(badline)
+
+	output = s s lname s fname s minit s mname s theaddress s thenumber s thestreet_direction s
++                thestreet_name s thestreet_type s 
++          thesubdivision_type s thesubdivision_number s
++          thecity s thestate s thezip s thearea_code s theexchange s therest s
++    thesuffix s theplus4 s theage s thecongress s thecounty s thedpv s thegender s thelatitude s thelongitude
++ s thetype s thespanish_street_type s thestreet_direction2 s s faltname s laltname s maltinit s maltname s thealtsuffix s
+
+
+	cleanup_phone(thephone2)  :f(badline)
+	output = s s lname s fname s minit s mname s theaddress s thenumber s thestreet_direction s
++                thestreet_name s thestreet_type s 
++          thesubdivision_type s thesubdivision_number s
++          thecity s thestate s thezip s thearea_code s theexchange s therest s
++    thesuffix s theplus4 s theage s thecongress s thecounty s thedpv s thegender s thelatitude s thelongitude
++ s thetype s thespanish_street_type s thestreet_direction2 s s faltname s laltname s maltinit s maltname s thealtsuffix s
+	:(return)
+		
+	
+onlyonephone	
+	cleanup_phone(thephone) :f(badline)
+	
+	output = s s lname s fname s minit s mname s theaddress s thenumber s thestreet_direction s
++                thestreet_name s thestreet_type s 
++          thesubdivision_type s thesubdivision_number s
++          thecity s thestate s thezip s thearea_code s theexchange s therest s
++    thesuffix s theplus4 s theage s thecongress s thecounty s thedpv s thegender s thelatitude s thelongitude
++ s thetype s thespanish_street_type s thestreet_direction2 s s faltname s laltname s maltinit s maltname s thealtsuffix s
+	:(return)
+	
+* note - subdivision_type and subdivision_number do not work yet.
+
+badline
+* find out wht is bad
+	z = y
+	&anchor = 0
+bll	z q = s	:s(bll)
+	&anchor = 1
+*	valid_line = name q phones q address q city q zip
+	x rall . bn q rall . bphone q rall . baddress q rall . bcity q rall . bzip rpos(0)
++	:f(realbad)
+	problem = ''
+	comma = ''
+	bn name	rpos(0) :s(s2)
+	problem = problem comma 'name('   bn  ')'
+	comma = ','
+s2	baddress address rpos(0) :s(s3)
+	problem = problem comma 'address'
+	comma = ','
+s3	bcity city rpos(0) :s(s5)
+	problem = problem comma 'city'
+	comma = ','
+s5	bzip zip rpos(0)	:s(s6)
+	problem = problem comma 'zip'
+	comma = ','
+s6	bphone phones rpos(0)	:s(s7)
+	problem = problem comma 'phone (' bphone ')'
+	comma = ','
+s7
+	output = 'error' s problem s z
+	:(freturn)
+realbad	
+	output = 'error' s 'invalid real bad' s z
+	
+	:(freturn)
+
+
+	
+
+		
+				
+								
+			
+				
+cleanup_text
+	&anchor = 1
+* convert tabs to spaces
+	s = replace(s,'	',' ')	
+* take spaces off the front
+ctloop1
+	s ' ' = ''	:s(ctloop1)
+* take spaces off the end
+	&anchor = 0
+ctloop2
+	s ' ' rpos(0) = '' :s(ctloop2)
+*
+* make multispace into single space
+ctloop3
+	s '  ' = ' ' :s(ctloop3)
+
+* convert vertical bar to space - sorrt
+	s = replace(s,'|',' ')
+* could handle gt, lt and the other escape characters here . Some other day ???
+	&anchor = 1
+	cleanup_text = s	:(return)
+
+
+
+	
+		
+address_exceptions	
+	address_exception = street_number . thenumber rall . thestreet_name | rall . thestreet_name
+	:(done_address_exceptions)
+		
+
+
+	
+		
+
+cleanup_phone
+*	p phone1	:s(cleanup_phone_good)
+* was doing that - but no more.
+* why - because the non-standard area code sizes (i.e. area code 207 in london) goof things up badly
+	&anchor = 0
+cleanup_phone_l
+	p '.' = ''	:s(cleanup_phone_l)
+	&anchor = 1
+	p '' rpos(0) :s(cleanup_phone_good)
+	p '44' = ''
+        p '0' :s(razzle)
+	p = '0' p
+razzle
+	p fixphone	:f(cleanup_phone_bad)
+cleanup_phone_good	
+        thearea_code '0' = ''
+	:(return)
+cleanup_phone_bad	
+	:(freturn)
+			
+					
+		
+isnotasuffix
+	output = 'xsf is ' xsf
+	xsf suffix	rpos(0)	:s(fsuf)
+	:(return)
+fsuf	
+	:(freturn)
+
+
+
+
+
+
+
+endd
+	
+end
+
+
+
+
+
+
+
+
+
+
+	
+
+
+

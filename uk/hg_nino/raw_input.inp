@@ -1,0 +1,1107 @@
+			
+			
+			
+0		Unused	
+1	NH		
+2	NH		
+3	NH		
+4	ME		
+5	ME		
+6	ME		
+7	ME		
+8	VT		
+9	VT		
+10	MA		
+11	MA		
+12	MA		
+13	MA		
+14	MA		
+15	MA		
+16	MA		
+17	MA		
+18	MA		
+19	MA		
+20	MA		
+21	MA		
+22	MA		
+23	MA		
+24	MA		
+25	MA		
+26	MA		
+27	MA		
+28	MA		
+29	MA		
+30	MA		
+31	MA		
+32	MA		
+33	MA		
+34	MA		
+35	RI		
+36	RI		
+37	RI		
+38	RI		
+39	RI		
+40	CT		
+41	CT		
+42	CT		
+43	CT		
+44	CT		
+45	CT		
+46	CT		
+47	CT		
+48	CT		
+49	CT		
+50	NY		
+51	NY		
+52	NY		
+53	NY		
+54	NY		
+55	NY		
+56	NY		
+57	NY		
+58	NY		
+59	NY		
+60	NY		
+61	NY		
+62	NY		
+63	NY		
+64	NY		
+65	NY		
+66	NY		
+67	NY		
+68	NY		
+69	NY		
+70	NY		
+71	NY		
+72	NY		
+73	NY		
+74	NY		
+75	NY		
+76	NY		
+77	NY		
+78	NY		
+79	NY		
+80	NY		
+81	NY		
+82	NY		
+83	NY		
+84	NY		
+85	NY		
+86	NY		
+87	NY		
+88	NY		
+89	NY		
+90	NY		
+91	NY		
+92	NY		
+93	NY		
+94	NY		
+95	NY		
+96	NY		
+97	NY		
+98	NY		
+99	NY		
+100	NY		
+101	NY		
+102	NY		
+103	NY		
+104	NY		
+105	NY		
+106	NY		
+107	NY		
+108	NY		
+109	NY		
+110	NY		
+111	NY		
+112	NY		
+113	NY		
+114	NY		
+115	NY		
+116	NY		
+117	NY		
+118	NY		
+119	NY		
+120	NY		
+121	NY		
+122	NY		
+123	NY		
+124	NY		
+125	NY		
+126	NY		
+127	NY		
+128	NY		
+129	NY		
+130	NY		
+131	NY		
+132	NY		
+133	NY		
+134	NY		
+135	NJ		
+136	NJ		
+137	NJ		
+138	NJ		
+139	NJ		
+140	NJ		
+141	NJ		
+142	NJ		
+143	NJ		
+144	NJ		
+145	NJ		
+146	NJ		
+147	NJ		
+148	NJ		
+149	NJ		
+150	NJ		
+151	NJ		
+152	NJ		
+153	NJ		
+154	NJ		
+155	NJ		
+156	NJ		
+157	NJ		
+158	NJ		
+159	PA		
+160	PA		
+161	PA		
+162	PA		
+163	PA		
+164	PA		
+165	PA		
+166	PA		
+167	PA		
+168	PA		
+169	PA		
+170	PA		
+171	PA		
+172	PA		
+173	PA		
+174	PA		
+175	PA		
+176	PA		
+177	PA		
+178	PA		
+179	PA		
+180	PA		
+181	PA		
+182	PA		
+183	PA		
+184	PA		
+185	PA		
+186	PA		
+187	PA		
+188	PA		
+189	PA		
+190	PA		
+191	PA		
+192	PA		
+193	PA		
+194	PA		
+195	PA		
+196	PA		
+197	PA		
+198	PA		
+199	PA		
+200	PA		
+201	PA		
+202	PA		
+203	PA		
+204	PA		
+205	PA		
+206	PA		
+207	PA		
+208	PA		
+209	PA		
+210	PA		
+211	PA		
+212	MD		
+213	MD		
+214	MD		
+215	MD		
+216	MD		
+217	MD		
+218	MD		
+219	MD		
+220	MD		
+221	DE		
+222	DE		
+223	VA		
+224	VA		
+225	VA		
+226	VA		
+227	VA		
+228	VA		
+229	VA		
+230	VA		
+231	VA		
+232	WV		
+233	WV		
+234	WV		
+235	WV		
+236	WV		
+237	NC		
+238	NC		
+239	NC		
+240	NC		
+241	NC		
+242	NC		
+243	NC		
+244	NC		
+245	NC		
+246	NC		
+247	SC		
+248	SC		
+249	SC		
+250	SC		
+251	SC		
+252	GA		
+253	GA		
+254	GA		
+255	GA		
+256	GA		
+257	GA		
+258	GA		
+259	GA		
+260	GA		
+261	FL		
+262	FL		
+263	FL		
+264	FL		
+265	FL		
+266	FL		
+267	FL		
+268	OH		
+269	OH		
+270	OH		
+271	OH		
+272	OH		
+273	OH		
+274	OH		
+275	OH		
+276	OH		
+277	OH		
+278	OH		
+279	OH		
+280	OH		
+281	OH		
+282	OH		
+283	OH		
+284	OH		
+285	OH		
+286	OH		
+287	OH		
+288	OH		
+289	OH		
+290	OH		
+291	OH		
+292	OH		
+293	OH		
+294	OH		
+295	OH		
+296	OH		
+297	OH		
+298	OH		
+299	OH		
+300	OH		
+301	OH		
+302	OH		
+303	IN		
+304	IN		
+305	IN		
+306	IN		
+307	IN		
+308	IN		
+309	IN		
+310	IN		
+311	IN		
+312	IN		
+313	IN		
+314	IN		
+315	IN		
+316	IN		
+317	IN		
+318	IL		
+319	IL		
+320	IL		
+321	IL		
+322	IL		
+323	IL		
+324	IL		
+325	IL		
+326	IL		
+327	IL		
+328	IL		
+329	IL		
+330	IL		
+331	IL		
+332	IL		
+333	IL		
+334	IL		
+335	IL		
+336	IL		
+337	IL		
+338	IL		
+339	IL		
+340	IL		
+341	IL		
+342	IL		
+343	IL		
+344	IL		
+345	IL		
+346	IL		
+347	IL		
+348	IL		
+349	IL		
+350	IL		
+351	IL		
+352	IL		
+353	IL		
+354	IL		
+355	IL		
+356	IL		
+357	IL		
+358	IL		
+359	IL		
+360	IL		
+361	IL		
+362	MI		
+363	MI		
+364	MI		
+365	MI		
+366	MI		
+367	MI		
+368	MI		
+369	MI		
+370	MI		
+371	MI		
+372	MI		
+373	MI		
+374	MI		
+375	MI		
+376	MI		
+377	MI		
+378	MI		
+379	MI		
+380	MI		
+381	MI		
+382	MI		
+383	MI		
+384	MI		
+385	MI		
+386	MI		
+387	WI		
+388	WI		
+389	WI		
+390	WI		
+391	WI		
+392	WI		
+393	WI		
+394	WI		
+395	WI		
+396	WI		
+397	WI		
+398	WI		
+399	WI		
+400	KY		
+401	KY		
+402	KY		
+403	KY		
+404	KY		
+405	KY		
+406	KY		
+407	KY		
+408	TN		
+409	TN		
+410	TN		
+411	TN		
+412	TN		
+413	TN		
+414	TN		
+415	TN		
+416	AL		
+417	AL		
+418	AL		
+419	AL		
+420	AL		
+421	AL		
+422	AL		
+423	AL		
+424	AL		
+425	MS		
+426	MS		
+427	MS		
+428	MS		
+429	AR		
+430	AR		
+431	AR		
+432	AR		
+433	LA		
+434	LA		
+435	LA		
+436	LA		
+437	LA		
+438	LA		
+439	LA		
+440	OK		
+441	OK		
+442	OK		
+443	OK		
+444	OK		
+445	OK		
+446	OK		
+447	OK		
+448	OK		
+449	TX		
+450	TX		
+451	TX		
+452	TX		
+453	TX		
+454	TX		
+455	TX		
+456	TX		
+457	TX		
+458	TX		
+459	TX		
+460	TX		
+461	TX		
+462	TX		
+463	TX		
+464	TX		
+465	TX		
+466	TX		
+467	TX		
+468	MN		
+469	MN		
+470	MN		
+471	MN		
+472	MN		
+473	MN		
+474	MN		
+475	MN		
+476	MN		
+477	MN		
+478	IA		
+479	IA		
+480	IA		
+481	IA		
+482	IA		
+483	IA		
+484	IA		
+485	IA		
+486	MO		
+487	MO		
+488	MO		
+489	MO		
+490	MO		
+491	MO		
+492	MO		
+493	MO		
+494	MO		
+495	MO		
+496	MO		
+497	MO		
+498	MO		
+499	MO		
+500	MO		
+501	ND		
+502	ND		
+503	SD		
+504	SD		
+505	NE		
+506	NE		
+507	NE		
+508	NE		
+509	KS		
+510	KS		
+511	KS		
+512	KS		
+513	KS		
+514	KS		
+515	KS		
+516	MT		
+517	MT		
+518	ID		
+519	ID		
+520	WY		
+521	CO		
+522	CO		
+523	CO		
+524	CO		
+525	NM		
+526	AZ		
+527	AZ		
+528	UT		
+529	UT		
+530	NV		
+531	WA		
+532	WA		
+533	WA		
+534	WA		
+535	WA		
+536	WA		
+537	WA		
+538	WA		
+539	WA		
+540	OR		
+541	OR		
+542	OR		
+543	OR		
+544	OR		
+545	CA		
+546	CA		
+547	CA		
+548	CA		
+549	CA		
+550	CA		
+551	CA		
+552	CA		
+553	CA		
+554	CA		
+555	CA		
+556	CA		
+557	CA		
+558	CA		
+559	CA		
+560	CA		
+561	CA		
+562	CA		
+563	CA		
+564	CA		
+565	CA		
+566	CA		
+567	CA		
+568	CA		
+569	CA		
+570	CA		
+571	CA		
+572	CA		
+573	CA		
+574	AK		
+575	HI		
+576	HI		
+577	DC		
+578	DC		
+579	DC		
+580	VI		
+581	PR		
+582	PR		
+583	PR		
+584	PR		
+585	NM		
+586	PI		
+587	MS		
+588	MS		
+589	FL		
+590	FL		
+591	FL		
+592	FL		
+593	FL		
+594	FL		
+595	FL		
+596	PR		
+597	PR		
+598	PR		
+599	PR		
+600	AZ		
+601	AZ		
+602	CA		
+603	CA		
+604	CA		
+605	CA		
+606	CA		
+607	CA		
+608	CA		
+609	CA		
+610	CA		
+611	CA		
+612	CA		
+613	CA		
+614	CA		
+615	CA		
+616	CA		
+617	CA		
+618	CA		
+619	CA		
+620	CA		
+621	CA		
+622	CA		
+623	CA		
+624	CA		
+625	CA		
+626	CA		
+627	TX		
+628	TX		
+629	TX		
+630	TX		
+631	TX		
+632	TX		
+633	TX		
+634	TX		
+635	TX		
+636	TX		
+637	TX		
+638	TX		
+639	TX		
+640	TX		
+641	TX		
+642	TX		
+643	TX		
+644	TX		
+645	TX		
+646	UT		
+647	UT		
+648	NM		
+649	NM		
+650		Future	
+651		Future	
+652		Future	
+653		Future	
+654		Future	
+655		Future	
+656		Future	
+657		Future	
+658		Future	
+659		Future	
+660		Future	
+661		Future	
+662		Future	
+663		Future	
+664		Future	
+665		Future	
+666		Future	
+667		Future	
+668		Future	
+669		Future	
+670		Future	
+671		Future	
+672		Future	
+673		Future	
+674		Future	
+675		Future	
+676		Future	
+677		Future	
+678		Future	
+679		Future	
+680		Future	
+681		Future	
+682		Future	
+683		Future	
+684		Future	
+685		Future	
+686		Future	
+687		Future	
+688		Future	
+689		Future	
+690		Future	
+691		Future	
+692		Future	
+693		Future	
+694		Future	
+695		Future	
+696		Future	
+697		Future	
+698		Future	
+699		Future	
+700		RR to 1963	
+701		RR to 1963	
+702		RR to 1963	
+703		RR to 1963	
+704		RR to 1963	
+705		RR to 1963	
+706		RR to 1963	
+707		RR to 1963	
+708		RR to 1963	
+709		RR to 1963	
+710		RR to 1963	
+711		RR to 1963	
+712		RR to 1963	
+713		RR to 1963	
+714		RR to 1963	
+715		RR to 1963	
+716		RR to 1963	
+717		RR to 1963	
+718		RR to 1963	
+719		RR to 1963	
+720		RR to 1963	
+721		RR to 1963	
+722		RR to 1963	
+723		RR to 1963	
+724		RR to 1963	
+725		RR to 1963	
+726		RR to 1963	
+727		RR to 1963	
+728		RR to 1963	
+729		Future	
+730		Future	
+731		Future	
+732		Future	
+733		Future	
+734		C	V
+735		Future	V
+736		Future	V
+737		Future	V
+738		Future	
+739		Future	Cutoff
+740		Future	
+741		Future	
+742		Future	
+743		Future	
+744		Future	
+745		Future	
+746		Future	
+747		Future	
+748		Future	
+749		Future	
+750		Future	
+751		Future	
+752		Future	
+753		Future	
+754		Future	
+755		Future	
+756		Future	
+757		Future	
+758		Future	
+759		Future	
+760		Future	
+761		Future	
+762		Future	
+763		Future	
+764		Future	
+765		Future	
+766		Future	
+767		Future	
+768		Future	
+769		Future	
+770		Future	
+771		Future	
+772		Future	
+773		Future	
+774		Future	
+775		Future	
+776		Future	
+777		Future	
+778		Future	
+779		Future	
+780		Future	
+781		Future	
+782		Future	
+783		Future	
+784		Future	
+785		Future	
+786		Future	
+787		Future	
+788		Future	
+789		Future	
+790		Future	
+791		Future	
+792		Future	
+793		Future	
+794		Future	
+795		Future	
+796		Future	
+797		Future	
+798		Future	
+799		Future	
+800		Invalid	
+801		Invalid	
+802		Invalid	
+803		Invalid	
+804		Invalid	
+805		Invalid	
+806		Invalid	
+807		Invalid	
+808		Invalid	
+809		Invalid	
+810		Invalid	
+811		Invalid	
+812		Invalid	
+813		Invalid	
+814		Invalid	
+815		Invalid	
+816		Invalid	
+817		Invalid	
+818		Invalid	
+819		Invalid	
+820		Invalid	
+821		Invalid	
+822		Invalid	
+823		Invalid	
+824		Invalid	
+825		Invalid	
+826		Invalid	
+827		Invalid	
+828		Invalid	
+829		Invalid	
+830		Invalid	
+831		Invalid	
+832		Invalid	
+833		Invalid	
+834		Invalid	
+835		Invalid	
+836		Invalid	
+837		Invalid	
+838		Invalid	
+839		Invalid	
+840		Invalid	
+841		Invalid	
+842		Invalid	
+843		Invalid	
+844		Invalid	
+845		Invalid	
+846		Invalid	
+847		Invalid	
+848		Invalid	
+849		Invalid	
+850		Invalid	
+851		Invalid	
+852		Invalid	
+853		Invalid	
+854		Invalid	
+855		Invalid	
+856		Invalid	
+857		Invalid	
+858		Invalid	
+859		Invalid	
+860		Invalid	
+861		Invalid	
+862		Invalid	
+863		Invalid	
+864		Invalid	
+865		Invalid	
+866		Invalid	
+867		Invalid	
+868		Invalid	
+869		Invalid	
+870		Invalid	
+871		Invalid	
+872		Invalid	
+873		Invalid	
+874		Invalid	
+875		Invalid	
+876		Invalid	
+877		Invalid	
+878		Invalid	
+879		Invalid	
+880		Invalid	
+881		Invalid	
+882		Invalid	
+883		Invalid	
+884		Invalid	
+885		Invalid	
+886		Invalid	
+887		Invalid	
+888		Invalid	
+889		Invalid	
+890		Invalid	
+891		Invalid	
+892		Invalid	
+893		Invalid	
+894		Invalid	
+895		Invalid	
+896		Invalid	
+897		Invalid	
+898		Invalid	
+899		Invalid	
+900		Invalid	
+901		Invalid	
+902		Invalid	
+903		Invalid	
+904		Invalid	
+905		Invalid	
+906		Invalid	
+907		Invalid	
+908		Invalid	
+909		Invalid	
+910		Invalid	
+911		Invalid	
+912		Invalid	
+913		Invalid	
+914		Invalid	
+915		Invalid	
+916		Invalid	
+917		Invalid	
+918		Invalid	
+919		Invalid	
+920		Invalid	
+921		Invalid	
+922		Invalid	
+923		Invalid	
+924		Invalid	
+925		Invalid	
+926		Invalid	
+927		Invalid	
+928		Invalid	
+929		Invalid	
+930		Invalid	
+931		Invalid	
+932		Invalid	
+933		Invalid	
+934		Invalid	
+935		Invalid	
+936		Invalid	
+937		Invalid	
+938		Invalid	
+939		Invalid	
+940		Invalid	
+941		Invalid	
+942		Invalid	
+943		Invalid	
+944		Invalid	
+945		Invalid	
+946		Invalid	
+947		Invalid	
+948		Invalid	
+949		Invalid	
+950		Invalid	
+951		Invalid	
+952		Invalid	
+953		Invalid	
+954		Invalid	
+955		Invalid	
+956		Invalid	
+957		Invalid	
+958		Invalid	
+959		Invalid	
+960		Invalid	
+961		Invalid	
+962		Invalid	
+963		Invalid	
+964		Invalid	
+965		Invalid	
+966		Invalid	
+967		Invalid	
+968		Invalid	
+969		Invalid	
+970		Invalid	
+971		Invalid	
+972		Invalid	
+973		Invalid	
+974		Invalid	
+975		Invalid	
+976		Invalid	
+977		Invalid	
+978		Invalid	
+979		Invalid	
+980		Invalid	
+981		Invalid	
+982		Invalid	
+983		Invalid	
+984		Invalid	
+985		Invalid	
+986		Invalid	
+987		Invalid	
+988		Invalid	
+989		Invalid	
+990		Invalid	
+991		Invalid	
+992		Invalid	
+993		Invalid	
+994		Invalid	
+995		Invalid	
+996		Invalid	
+997		Invalid	
+998		Invalid	
+999		Invalid	
+			
+			
+		No 00	
+			
+1			
+3			
+5			
+7			
+9			
+10			
+12			
+14			
+16			
+18			
+20			
+22			
+24			
+26			
+28			
+30			
+32			
+34			
+36			
+38			
+40			
+42			
+44			
+46			
+48			
+50			
+52			
+54			
+56			
+58			
+60			
+62			
+64			
+66			
+68			
+70			
+72			
+74			
+76			
+78			
+80			
+82			
+84			
+86			
+88			
+90			
+92			
+94			
+96			
+98			
+2			
+4			
+6			
+8			
+11			
+13			
+15			
+17			
+19			
+21			
+23			
+25			
+27			
+29			
+31			
+33			
+35			
+37			
+39			
+41			
+43			
+45			
+47			
+49			
+51			
+53			
+55			
+57			
+59			
+61			
+63			
+65			
+67			
+69			
+71			
+73			
+75			
+77			
+79			
+81			
+83			
+85			
+87			
+89			
+91			
+93			
+95			
+97			
+99			
+		No 0000	

@@ -1,0 +1,192 @@
+Fake Identity Generator
+Copyright (C) 2011-2016 Hibbard M. Engler (Bitcoin address 1ERDHsxtekdh5FAsxdb92PBFK7nnuwMkbp for gifts)
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+Format of l files  Vertical bar separated
+
+1	0	error
+2	1	message| id number
+3	2	Last name
+4	3	first_name
+5	4	middle_init
+6	5	middle_name
+7	6	full address
+8	7		street number
+9	8		street direction
+10	9		street name
+11	10		street type
+12	11		subdivision type
+13	12		subdivision number
+14	13	city
+15	14	state
+16	15	zip
+17	16	area code
+18	17	prefix
+19	18	rest phone
+20 	19	name suffix
+21	20	plus4 part of zip code
+22	21	age range
+23	22	congress
+24	23	county
+25	24	dpv
+26	25	gender
+27	26	latitude - looks like based on city or zip
+28	27	longitude - looks like based on city or zip
+29	28	type
+30	29	spanish street type - aprt of address. Example via raton - via!
+31	30	second street direction - i.e. 504 hillsdale blvd w    - the w is the second direction part of the address
+---------------l005 processingvvv
+32	31	loo5> derived id
+33	32	l005> new first name
+34	33	l005> new last name
+35	34	l005> new middle initial
+36	35	l005> new middle name
+37	36	l005> new name suffix
+38	37	l005> 1 if singleton
+39	38	l005> maiden name
+----------------l007:
+40	39	ac1
+41	40	prefix1
+42	41	rest1
+43	42	ac2
+44	43	prefix2
+45	44	rest2
+46	45	reserved
+47	46	reserved
+48	47	reserved
+49	48	reserved
+50	49	birth_state
+51	50	birth_date
+52	51	birth_date_code
+53	52	ssn_part_1
+54	53	ssn_part_2
+55	54	ssn_part_3
+56	55	ssn
+57	56	DL
+58	57	cc1
+59	58	cc1 exp
+60	59	cc1 ccv
+61	60	cc2 ccv
+62	61	cc2 exp
+63	62	cc2 ccv
+64	63	cc3
+65	64	cc3 exp
+66	65	cc3 ccv
+67	66	passport number
+68	67	passport expdate
+69	68	passport extra code
+70	69	passport code1
+71	70	passport code2
+72	71	reserved
+73	72	reserved
+74	73	gender - truncated to be 1 character - so we do not know the gender derivation anymore
+75	74	newid - random. This id will be used in the new system.
+76	75	newspouseid -
+
+leads.txt - source
+l001.txt - snoballed with errors
+l002.txt errors filtered.
+l003.txt unique at house|zipcode.  Turns out the data is already cleaned.  
+         So for now, l002.txt and l003.txt are together
+	 Also remove duplicate names.
+l004.txt 	
+FP001.1:
+	1	derived_id
+	2	ofname
+	3	omi
+	4	omname
+	5	olname
+	6	osuffix
+	7	gender
+	8	fulladdress
+	9	street_number
+9	10	streetdirection
+30	11	spanish street name
+10	12	streetname
+11	13	streettype
+31	14	second street direction
+12	15	subdivisiontype
+13	16	subdivision_number
+14	17	city
+15	18	state
+16	19	zip
+17	20	areacode
+18	21	prefix
+19	22	rest phone
+	23-29	reserved
+FP001.2:
+	30	preferred_gender
+	31	new fname
+	32	new lname
+FP001.3:
+	33	new minit
+	34	new mname
+	35	new suffix
+
+
+base -> ass derived_id -> FP001.1
+FP001.1 -> FP002.1 process based on zip code
+        -> FP001.2
+
+FP001.2 -> FP001.3
+FP001.3 ->FP001.1 (filter street, filter city, filter zipcode, filter state, filter first,last,area code)
+
+Then reporcess FP001 until done.
+
+	
+Then from FP003, we sum up males'females and distribute more females to each house.  To equal 55 percent females.
+Using the existing ratio of M/F as a guide. or not.
+
+From this, we have new records -- run throught FP001.
+etc.
+
+Then we count our population,  and add houses as necessary based on the dirtribution.
+This will probably be done per zipcode or something like that,  I don't really know.  I guess I could do in flow.
+
+
+Then these houses have new people - generate names, filter, etc.
+
+We now have all the people.
+	
+For these people,  give them phone numbers.
+
+Then give them birthdates
+Then get rid of all real derived information
+
+Then give them social security cards.
+Then give them drivers licenses
+Then give them credit cards
+Then Sign the record - with derivations. and give it an id code.
+Give it an ID code. after signed.
+And use the id code.
+
+woof! all the other stuff bearly matters.
+
+Hibbard|Engler|1339...||||||||||
+Signature file:
+Hibbard|Engler|1339...||||||||||
+dep|first_name|ID.........ID
+dep|last_name|ID..........ID
+dep|Middle|name|ID.........ID
+dep|phone_number|ID........ID
+dep|database|ID........ID
+
+
+
+Every script is id'd
+Every file is id'd/signed
+Etc.
+

@@ -1,0 +1,64 @@
+
+
+#
+# Fake Identity Generator
+# Copyright (C) 2011-2016 Hibbard M. Engler (Bitcoin address 1ERDHsxtekdh5FAsxdb92PBFK7nnuwMkbp for gifts)
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+filters.txt:	filters_p1.txt ../common/state_lname_fname_minit.txt
+	touch filters.txt
+
+filters_p1.txt:	../common/city_street_lname.txt ../common/zipcode_street_lname.txt \
+ ../common/city_lname_fname.txt \
+ ../common/area_code_lname_fname.txt ../common/zipcode_lname_fname.txt 
+	touch filters_p1.txt
+
+../common/city_street_lname.txt: ../common/l004.txt
+	@echo city_street_lname --p3
+	time fielduc 6000000 -s 15 14 10  3 <../common/l004.txt >q1.txt
+	mv q1.txt ../common/city_street_lname.txt
+
+../common/zipcode_street_lname.txt: ../common/l004.txt
+	@echo zipcode_street_lname 
+	time fielduc 8000000 -s 16 10 3 <../common/l004.txt >q2.txt
+	mv q2.txt ../common/zipcode_street_lname.txt
+
+
+../common/city_lname_fname.txt: ../common/l004.txt
+	@echo city_lname_fname  --p5
+	time fielduc 6000000 -s 15 14 3 4 <../common/l004.txt >q3.txt
+	mv q3.txt ../common/city_lname_fname.txt
+
+../common/zipcode_lname_fname.txt: ../common/l004.txt
+	@echo zipcode_lname_fname
+	time fielduc 6000000 -s 16 3 4 <../common/l004.txt >q4.txt
+	mv q4.txt ../common/zipcode_lname_fname.txt
+
+../common/area_code_lname_fname.txt: ../common/l004.txt
+	@echo area_code_lname_fname --p6
+	time fielduc 6000000 -s 17 3 4 <../common/l004.txt >q7.txt
+	mv q7.txt ../common/area_code_lname_fname.txt
+
+
+../common/state_lname_fname_minit.txt: fixed_middle_initials.txt filters_p1.txt
+	@echo state_lname_fname_minit.txt  --p5
+	@echo we get this from fixed_middle_initials.txt instead of l004 because
+	@echo we finesse the middle initial when we run make_name_from_name
+	@echo and we want the middle initial to jive
+	 multiproc.sh <fixed_middle_initials.txt match -p -l 15 special_states.inp \
+  2>/dev/null | time fielduc 6000000 -s 15 3 4 5  >j3.txt
+	mv j3.txt ../common/state_lname_fname_minit.txt
+

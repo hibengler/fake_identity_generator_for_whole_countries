@@ -1,0 +1,40 @@
+Fake Identity Generator
+Copyright (C) 2011-2016 Hibbard M. Engler (Bitcoin address 1ERDHsxtekdh5FAsxdb92PBFK7nnuwMkbp for gifts)
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+
+hydra - multi snaked output.
+Split into about 600k items (about 400 of them) and have each one listed in idsoandso.txt
+husbands and wives are kept together.
+
+
+600000 is less than 28*28*28*28
+so that is what we are going to have - 
+For each set we get 28 random nouns - done 4 ways.
+and the deeper one goes, the better it gets.
+
+There will be 44,000 entries - I will get it from the english dictonary randomized
+and use that to build the hydra program.
+
+That gets a number, which we add to the base number.
+
+Then the number should get us another number, and we can look up 
+that number by id?
+The numebrs in ascii have 11 characters, in 64 bit they have 8 - so the filename is 
+ok,
+
+
+

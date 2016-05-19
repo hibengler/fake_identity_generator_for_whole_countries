@@ -1,0 +1,170 @@
+
+
+#
+# Fake Identity Generator
+# Copyright (C) 2011-2016 Hibbard M. Engler (Bitcoin address 1ERDHsxtekdh5FAsxdb92PBFK7nnuwMkbp for gifts)
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+
+
+system:	good_name_p8.txt
+
+tiny:	good_name_p8b.txt
+	@echo tiny run `cat run`
+	mv good_name_p8b.txt good_name_p8.txt	
+	mv good_name_p2b.txt good_name_p2.txt	
+	touch good_name_p1.txt	
+	mv singleton_name_p1b.txt singleton_name_p1.txt
+	mv singleton_name_p2b.txt singleton_name_p2.txt
+	
+
+small:	good_name_p8a.txt
+	@echo small run `cat run`
+	mv good_name_p8a.txt good_name_p8.txt	
+	mv good_name_p2a.txt good_name_p2.txt	
+	touch good_name_p1.txt	
+	mv singleton_name_p1a.txt singleton_name_p1.txt
+	mv singleton_name_p2a.txt singleton_name_p2.txt
+	
+
+good_name_p8.txt:	good_name_p2.txt 
+	bash filter_me.sh "-p -l" 
+
+good_name_p8a.txt:	good_name_p2a.txt
+	bash filter_me.sh "-p -l" 
+	mv good_name_p8.txt good_name_p8a.txt
+
+good_name_p8b.txt:	good_name_p2b.txt
+	bash filter_me.sh ""
+	mv good_name_p8.txt good_name_p8b.txt
+
+
+good_name_p2a.txt:	 new_last_namea.txt \
+ singleton_name_p2a.txt
+	@echo good_name_p2a.txt run `cat run`
+	@echo this is normally the wedding ceremony
+	cat >f4.txt singleton_name_p2a.txt
+	mv f4.txt good_name_p2.txt
+	touch good_name_p2a.txt
+	touch state_lname_fname_minit.txt
+	
+
+singleton_name_p2a.txt: singleton_name_p1a.txt new_last_namea.txt
+	@echo singleton_name_p2a.txt run `cat run`
+	@echo this is normally the wedding ceremony
+	marry_people <singleton_name_p1a.txt >f5.txt
+	mv f5.txt singleton_name_p2a.txt
+
+new_last_namea.txt:  singleton_name_p1a.txt
+	@echo new_last_namea.txt run `cat run`
+	touch good_name.txt
+	time cat good_name.txt singleton_name_p1a.txt | \
+	fsort  28000000000 2 34 99 >f3.txt
+	mv f3.txt new_last_name.txt
+	touch new_last_namea.txt
+
+singleton_name_p1a.txt: random_seed_f 
+	@echo singleton_name_p1a.txt run `cat run`
+	time make_singleton_name <redo_lname.txt -p -l >z1.txt `cat random_seed_f`
+	time make_singleton_name -f <redo_fname.txt -f -p -l >>z1.txt `cat random_seed_f`
+	mv z1.txt singleton_name_p1a.txt	
+
+
+
+
+good_name_p2b.txt:  singleton_name_p2b.txt 
+	@echo good_name_p2b.txt run `cat run`
+	@echo this is normally the wedding ceremony
+	cat >f4.txt singleton_name_p2b.txt
+	mv f4.txt good_name_p2.txt
+	touch good_name_p2b.txt
+	touch state_lname_fname_minit.txt
+	
+
+singleton_name_p2b.txt: singleton_name_p1b.txt 
+	@echo singleton_name_p2b.txt run `cat run`
+	@echo this is normally the wedding ceremony
+	cp singleton_name_p1b.txt singleton_name_p2b.txt
+
+new_last_nameb.txt:  singleton_name_p1b.txt
+	@echo new_last_nameb.txt run `cat run`
+	touch good_name.txt
+	 cat good_name.txt singleton_name_p1b.txt | \
+	fsort 28000000000  2 34 99 >f3.txt
+	mv f3.txt new_last_name.txt
+	touch new_last_nameb.txt
+
+singleton_name_p1b.txt: random_seed_f 
+	@echo singleton_name_p1b.txt run `cat run`
+	time multiproc.sh make_singleton_name <redo_lname.txt -p -l >z1.txt `cat random_seed_f`
+	time multiproc.sh make_singleton_name -f <redo_fname.txt -f -p -l >>z1.txt `cat random_seed_f`
+	mv z1.txt singleton_name_p1b.txt	
+
+
+
+
+	
+
+good_name_p2.txt:	good_name_p1.txt new_last_name.txt \
+ singleton_name_p2.txt
+	@echo good_name_p2.txt run `cat run`
+	@echo this is normally the wedding ceremony
+	multiproc.sh marry_people <good_name_p1.txt >f4.txt
+	cat >>f4.txt singleton_name_p2.txt
+	mv f4.txt good_name_p2.txt
+	touch state_lname_fname_minit.txt
+	
+
+singleton_name_p2.txt: singleton_name_p1.txt new_last_name.txt
+	@echo singleton_name_p2.txt run `cat run`
+	@echo this is normally the wedding ceremony
+	multiproc.sh marry_people <singleton_name_p1.txt >f5.txt
+	mv f5.txt singleton_name_p2.txt
+
+new_last_name.txt: good_name_p1.txt singleton_name_p1.txt
+	@echo new_last_name.txt run `cat run`
+	touch good_name.txt
+	time cat good_name.txt good_name_p1.txt singleton_name_p1.txt | \
+	fsort 28000000000 2 34 99 >f3.txt
+	mv f3.txt new_last_name.txt
+
+
+
+singleton_name_p1.txt: good_name_p1.txt
+	@echo singleton_name_p1.txt run `cat run`
+	time make_singleton_name <bad_name_p1.txt -p -l >z1.txt `cat random_seed_f`
+	time make_singleton_name <bad_name_p1f.txt -p -l >>z1.txt `cat random_seed_f`
+	mv z1.txt singleton_name_p1.txt		
+
+
+
+good_name_p1.txt: random_seed_f 
+	@echo good_name_p1.txt run `cat run`
+	# make the last name and first name
+	 multiproc.sh make_name_from_name `cat random_seed_f`  -p -l \
+	 <redo_lname.txt >yq.txt 2>yqe.txt
+	 multiproc.sh make_name_from_name `cat random_seed_f`  -p -l -f \
+	 <redo_fname.txt >>yq.txt 2>yqef.txt
+	 mv yq.txt good_name_p1.txt
+	 -grep -v ^warning  <yqe.txt >bad_name_p1.txt
+	 -grep -v ^warning  <yqef.txt >bad_name_p1f.txt
+	 rm yqe.txt
+
+
+random_seed_f:
+	generate_random_seed >random_seed_f
+	
+	

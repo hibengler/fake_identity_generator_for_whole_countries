@@ -1,0 +1,68 @@
+Fake Identity Generator
+Copyright (C) 2011-2016 Hibbard M. Engler (Bitcoin address 1ERDHsxtekdh5FAsxdb92PBFK7nnuwMkbp for gifts)
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+
+
+Fake name Generator
+
+This is the software used to generate fake names.  It did this using a set of real names obtained legally, expanding it, adding
+socual security numbers, phone numbers, drivers licenses, etc.
+
+This powers xdd.org xdduk.org xdd2.org and other sets of fake identity information.
+
+
+
+
+
+
+How to generate
+cd ~/cvs/player
+. ./setup
+cd src
+make 
+cd ..
+script something
+export SET=SOANDSO
+export OWN=SUCHANDSUCH
+mkdir out
+time make
+
+
+
+
+
+... edit hc hd and he filter_me.sh scripts to add the filters of all the 
+previous runs.
+This is done after typing make because you have about 10 hours to get it done.
+
+cd src
+Edit make_birthdate1.c make_birthdate2.c add_birthdate_birth_state.c
+make_ssn_numbers.c
+(make_nuid_numbers.c make_dl_uk.c) to the current date
+make
+
+
+The full process takes 9 days on my 6 core cpu with 4 2tb drives 
+raid 0 and 32gb ram.
+
+
+
+
+cd he_extra_houses_and_people
+time bash save_new.sh
+cp exlfza_$SET.txt /t/exlfza
+

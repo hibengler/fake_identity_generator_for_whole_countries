@@ -1,0 +1,4 @@
+m001.txt is our final output - with all the internal stuff hidden
+
+But that is not good enough - because we want to watermark it before we send
+to the rest of the world.

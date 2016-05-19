@@ -1,0 +1,5 @@
+export PLAYER_HOME=~/player
+export PATH=$PLAYER_HOME/bin:$PATH
+export LC_ALL=C
+export TMP=/tmp
+export TMP2=/tmp

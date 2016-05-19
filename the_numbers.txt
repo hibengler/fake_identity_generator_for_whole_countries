@@ -1,0 +1,12 @@
+leads.txt		126065114	original leads.txt
+l001.txt		126066313	The and function pulls out other users.
+l002.txt		126065601	Expanded the "ands"??? I don't think so.  I think we just filtered out the errors.
+l003.txt		89737163	deduplicated
+l003_duplicates.txt	36328438	duplicates
+l004.txt		89737163    l005 should be the same.
+l005.txt		89737163	yep, we are ok
+l006.txt		127113733	could vary some because of random numbers
+l007.txt		250366274	Wow!
+
+l008.txt		250366274
+l009.txt		250366274
