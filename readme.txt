@@ -1,5 +1,5 @@
 Fake Identity Generator
-Copyright (C) 2011-2016 Hibbard M. Engler (Bitcoin address 1ERDHsxtekdh5FAsxdb92PBFK7nnuwMkbp for gifts)
+Copyright (C) 2011-2017 Hibbard M. Engler (Bitcoin address 1ERDHsxtekdh5FAsxdb92PBFK7nnuwMkbp for gifts)
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -15,7 +15,36 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-player - as in a game,  but this is not a game.
+This is the source code that made the websites xdd.org, xdd2.org, and xdduk.org.  It uses bar_database as the database server, information processor.   Lanuages are C, Perl, snobol4, bash, awk.
+
+Development took 18 months,a nd the website was released in 2012.  The idea was to make data for corporate honeypots, to help keep the real infomration safe.
+
+Then google started crawling the website.
+They at one point (2014) had 140 million entries in their search engine, which caused some confusion.  We were getting 70,000 page views from users a day, and made some money on advertizing until google did a manual edit, and said that xdd doesn't fit with their guidelines. 
+
+I also did xdduk.org for england, and wante to do Austrlia, Canada, China, and India.
+What happened when this was on google, is that people would not get everyone's real information. I was protecting the identity of everyone in the country.  :)
+
+Right now, xdd.org is down for maintennace, but it is still running.  
+There are many components that make this real cool including:
+
+rtr - a web server in C that does single thread assymetric blocking.  It could handle about 400 page views a second, that with reading a huge 600 gb database.
+
+The database (bar_database) - binary search on bar delimited files (bar|delimited|files|).   The file was memory mapped, and the drives are 3 raid 0 SSD's.  Real fast.
+
+And of course, the final result - a complete set of people with reasonable names, addresses, phone numbers, Social security numbers, passport numbers, credit card numbers,  all consistent with eachother, and believable , but entirely fallacious. Thats the best part.
+
+I did this with extreme do-diligance. Including queryiong with the FBI before doing it.  I also was investigated by the Social Security Administration special services, but never was commited of a crime.
+
+So, please, use this for good, maybe a video game that needs a realistic fake town or faks country with fake peopl? maybe as the honeypot to alert companies of a break-in before they get to the real customer data, things like that.
+Don't use it for comitting fraud. I do not hand have never condoned doing that. Some people have tried using the fake names to commit crimes, and I worked with law enforcement in those cases. Blah Blah Blah.
+
+
+
+Hib
+
+Below is the readme when I first started the project.
+
 
 My idea was simple:
 
